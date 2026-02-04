@@ -21,7 +21,7 @@ export function FaqAccordion({ entries }: { entries: Entry[] }) {
           <button
             type="button"
             onClick={() => setOpenId(openId === i ? null : i)}
-            className="w-full flex items-center gap-3 px-4 sm:px-6 py-4 text-left hover:bg-white/5 transition"
+            className="w-full flex items-center gap-3 px-4 sm:px-6 py-4 text-left hover:bg-white/5 transition touch-no-zoom"
           >
             {openId === i ? (
               <ChevronDown className="flex-shrink-0 text-accent" size={20} />

@@ -8,7 +8,7 @@ export default function HomePage() {
         <p className="text-accent font-display font-bold text-sm uppercase tracking-wider mb-2">
           Official
         </p>
-        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-text-primary mb-3">
+        <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary mb-3">
           smL Tournament Rules Hub
         </h1>
         <p className="text-text-muted text-lg sm:text-xl">

@@ -11,6 +11,7 @@ const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-orbitron' });
 export const metadata: Metadata = {
   title: 'smL Tournament Rules Hub',
   description: 'Official smL tournament rules, restrictions, and clarifications. Single source of truth for competitive play.',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes',
 };
 
 export default function RootLayout({

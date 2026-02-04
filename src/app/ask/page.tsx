@@ -14,7 +14,7 @@ export default function AskPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = input.trim();
     if (!text || loading) return;
@@ -23,11 +23,18 @@ export default function AskPage() {
     setMessages((m) => [...m, { role: 'user', text }]);
     setLoading(true);
 
-    setTimeout(() => {
-      const reply = getBotReply(text);
+    try {
+      const reply = await getAIBotReply(text);
       setMessages((m) => [...m, { role: 'assistant', text: reply }]);
+    } catch (error) {
+      console.error('Error getting bot reply:', error);
+      setMessages((m) => [...m, {
+        role: 'assistant',
+        text: 'Sorry, I encountered an error. Please try again or check the Rules and FAQ pages.',
+      }]);
+    } finally {
       setLoading(false);
-    }, 300);
+    }
   }
 
   return (
@@ -39,14 +46,14 @@ export default function AskPage() {
         Have questions? Ask the Rules Bot. Answers are based only on official smL rules.
       </p>
 
-      <div className="bg-panel border border-border rounded-xl flex flex-col overflow-hidden min-h-[400px]">
+      <div className="bg-panel border border-border rounded-xl flex flex-col overflow-hidden min-h-[60vh] sm:min-h-[400px]">
         <div className="px-4 py-3 border-b border-border bg-panel/80">
           <p className="text-sm font-medium text-text-primary">
             Have questions? Ask the Rules Bot.
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[320px]">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[50vh] sm:min-h-[320px]">
           {messages.length === 0 && (
             <p className="text-text-muted text-sm">
               Type a question (e.g. &quot;Can two people use the same tool?&quot; or &quot;Is Rebirth allowed on Base?&quot;).
@@ -65,7 +72,7 @@ export default function AskPage() {
                 </div>
               )}
               <div
-                className={`max-w-[85%] rounded-lg px-4 py-2.5 ${
+                className={`max-w-[90%] sm:max-w-[85%] rounded-lg px-4 py-2.5 ${
                   msg.role === 'assistant'
                     ? 'bg-accent/10 border border-accent/30 text-text-primary'
                     : 'bg-border/50 text-text-primary'
@@ -105,7 +112,7 @@ export default function AskPage() {
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="p-2.5 rounded-lg bg-accent hover:bg-accent/90 disabled:opacity-50 text-white transition"
+              className="p-2.5 min-h-[44px] min-w-[44px] rounded-lg bg-accent hover:bg-accent/90 disabled:opacity-50 text-white transition touch-no-zoom"
               aria-label="Send"
             >
               <Send size={20} />

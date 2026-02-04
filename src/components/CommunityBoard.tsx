@@ -122,9 +122,30 @@ export function CommunityBoard() {
 
   if (!isSupabaseConfigured) {
     return (
-      <div className="bg-panel border border-border rounded-xl p-6 text-center">
-        <p className="text-text-muted">
-          Community board is not configured. Add <code className="text-text-primary">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="text-text-primary">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to enable it.
+      <div className="bg-panel border border-border rounded-xl p-6 space-y-4">
+        <div className="text-center">
+          <p className="text-text-primary font-medium mb-2">Community Board Not Configured</p>
+          <p className="text-text-muted text-sm mb-4">
+            To enable the community discussion board, you need to set up Supabase.
+          </p>
+        </div>
+        <div className="bg-bg/50 rounded-lg p-4 text-sm">
+          <p className="text-text-primary font-medium mb-2">Setup Steps:</p>
+          <ol className="list-decimal list-inside space-y-1 text-text-muted">
+            <li>Create a project at <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">supabase.com</a></li>
+            <li>Run the SQL script in <code className="text-text-primary">supabase/schema.sql</code></li>
+            <li>Add environment variables:
+              <ul className="list-disc list-inside ml-4 mt-1">
+                <li><code className="text-text-primary">NEXT_PUBLIC_SUPABASE_URL</code></li>
+                <li><code className="text-text-primary">NEXT_PUBLIC_SUPABASE_ANON_KEY</code></li>
+              </ul>
+            </li>
+            <li>For GitHub Pages: Add these as repository secrets in <strong>Settings → Secrets and variables → Actions</strong></li>
+            <li>Rebuild and redeploy</li>
+          </ol>
+        </div>
+        <p className="text-text-muted text-xs text-center">
+          Until configured, use the "Discuss on GitHub" option above or the Rules Bot for questions.
         </p>
       </div>
     );
@@ -152,7 +173,7 @@ export function CommunityBoard() {
               maxLength={32}
               className="flex-1 bg-bg border border-border rounded-lg px-4 py-2 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
             />
-            <button type="submit" className="px-4 py-2 rounded-lg bg-accent text-white font-medium hover:bg-accent/90">
+            <button type="submit" className="px-4 py-2.5 min-h-[44px] rounded-lg bg-accent text-white font-medium hover:bg-accent/90 touch-no-zoom">
               Continue
             </button>
           </form>
@@ -164,7 +185,7 @@ export function CommunityBoard() {
           <form onSubmit={handleSubmit} className="space-y-2">
             {replyTo && (
               <p className="text-sm text-text-muted">
-                Replying to post. <button type="button" className="text-accent hover:underline" onClick={() => setReplyTo(null)}>Cancel</button>
+                Replying to post. <button type="button" className="text-accent hover:underline py-2 px-2 min-h-[44px] min-w-[44px] touch-no-zoom" onClick={() => setReplyTo(null)}>Cancel</button>
               </p>
             )}
             <textarea
@@ -179,7 +200,7 @@ export function CommunityBoard() {
               <button
                 type="submit"
                 disabled={sending || !newBody.trim()}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-white font-medium hover:bg-accent/90 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-lg bg-accent text-white font-medium hover:bg-accent/90 disabled:opacity-50 touch-no-zoom"
               >
                 <Send size={18} /> Post
               </button>
@@ -213,7 +234,7 @@ export function CommunityBoard() {
                     <button
                       type="button"
                       onClick={() => setReplyTo(post.id)}
-                      className="mt-2 text-sm text-accent hover:underline"
+                      className="mt-2 text-sm text-accent hover:underline py-2 px-2 min-h-[44px] min-w-[44px] touch-no-zoom"
                     >
                       Reply
                     </button>

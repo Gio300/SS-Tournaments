@@ -9,6 +9,7 @@ Official website for **smL tournament rules**: single source of truth, rules ind
 
 - **Next.js 14** (App Router), **Tailwind CSS**, **Lucide React**
 - **Fonts:** Inter, Orbitron (headers)
+- **AI Rules Bot:** Cloudflare Workers AI (Llama 3.1 8B) - optional, falls back to keyword matching
 - **Community:** Supabase (anonymous display name in localStorage)
 - **Deploy:** Static export → GitHub Pages or Vercel
 
@@ -26,6 +27,7 @@ Open [http://localhost:16440](http://localhost:16440).
 Copy `.env.example` to `.env.local` and set:
 
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` if you use the **Community Board**.
+- `NEXT_PUBLIC_CF_WORKER_URL` if you want **AI-powered Rules Bot** (see Cloudflare Worker setup below).
 
 To enable the board:
 
@@ -34,6 +36,8 @@ To enable the board:
 3. Add the project URL and anon key to `.env.local`.
 
 Without Supabase, the rest of the site (Rules, FAQ, Rules Bot) works; the Community page will show a loading error for the feed.
+
+Without Cloudflare Worker, the Rules Bot uses enhanced keyword matching (with synonym expansion and partial word matching).
 
 ## Build (static export)
 

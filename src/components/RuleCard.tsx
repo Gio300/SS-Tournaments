@@ -18,7 +18,7 @@ export function RuleCard({ section }: { section: RuleSection }) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between gap-3 px-4 sm:px-6 py-4 text-left hover:bg-white/5 transition"
+        className="w-full flex items-center justify-between gap-3 px-4 sm:px-6 py-4 text-left hover:bg-white/5 transition touch-no-zoom"
       >
         <span className="font-display font-semibold text-text-primary">
           {section.title}
