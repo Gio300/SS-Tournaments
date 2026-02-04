@@ -3,6 +3,7 @@ import { Inter, Orbitron } from 'next/font/google';
 import './globals.css';
 import { Nav } from '@/components/Nav';
 import { Footer } from '@/components/Footer';
+import { RulesBotFab } from '@/components/RulesBotFab';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-orbitron' });
@@ -19,9 +20,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${orbitron.variable}`}>
-      <body className="font-sans antialiased min-h-screen flex flex-col">
+      <body className="font-sans antialiased min-h-screen flex flex-col relative">
+        <div
+          className="fixed inset-0 -z-10 bg-app-background"
+          aria-hidden
+        />
         <Nav />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 relative z-0">{children}</main>
+        <RulesBotFab />
         <Footer />
       </body>
     </html>

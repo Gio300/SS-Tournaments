@@ -16,7 +16,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:16440](http://localhost:16440).
 
 ## Environment (optional)
 
@@ -44,7 +44,8 @@ Output is in the `out/` folder. Serve it with any static host.
 
 1. Create a repo on GitHub (e.g. `SS-Tournaments`) and push this project to `main`.
 
-2. In the repo: **Settings → Pages → Build and deployment**: set Source to **GitHub Actions**.
+2. In the repo: **Settings → Pages → Build and deployment**: set Source to **GitHub Actions**.  
+   **Important:** The live site must use GitHub Actions as the Pages source. If you use "Deploy from a branch" instead, GitHub will serve the repository root (e.g. README) and the built Next.js app will not appear.
 
 3. On the next push to `main`, the workflow (`.github/workflows/deploy-pages.yml`) will build and deploy. The site will be at:
    `https://YOUR_USERNAME.github.io/SS-Tournaments/`
@@ -77,6 +78,10 @@ The workflow sets `GITHUB_REPO` to the repo name so base path works for project 
 
 - Connect the repo to Vercel; no `output: 'export'` needed if you prefer server mode, or keep export and use “Static Export” as needed.
 - Add env vars (e.g. Supabase) in the Vercel dashboard.
+
+## Art assets (optional)
+
+To add Shinobi Striker / Naruto-to-Boruto themed background and hero images, see `public/README.md`. Place `hero.jpg` and/or `bg-pattern.png` in `public/`; use only assets you have rights to.
 
 ## Updating rules
 

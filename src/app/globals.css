@@ -33,3 +33,32 @@ button:focus-visible {
 .rule-ban::before { content: '❌'; margin-right: 0.5rem; }
 .rule-restriction::before { content: '⚠️'; margin-right: 0.5rem; }
 .rule-allowed::before { content: '✅'; margin-right: 0.5rem; }
+
+/* Full-page background layer: gradient overlay + optional image (e.g. public/bg-pattern.png) */
+.bg-app-background {
+  background-color: var(--bg);
+  background-image: linear-gradient(
+      180deg,
+      var(--bg) 0%,
+      rgba(11, 14, 20, 0.85) 40%,
+      rgba(11, 14, 20, 0.9) 100%
+    ),
+    url('/bg-pattern.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Hero section background (e.g. public/hero.jpg) */
+.hero-bg {
+  background-color: var(--panel);
+  background-image: linear-gradient(
+      to right,
+      rgba(11, 14, 20, 0.92) 0%,
+      rgba(20, 24, 36, 0.88) 50%,
+      rgba(11, 14, 20, 0.92) 100%
+    ),
+    url('/hero.jpg');
+  background-size: cover;
+  background-position: center;
+}

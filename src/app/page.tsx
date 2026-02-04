@@ -4,7 +4,7 @@ import { BookOpen, MessageCircle, Users, AlertTriangle } from 'lucide-react';
 export default function HomePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-      <div className="bg-panel border border-border rounded-xl p-6 sm:p-8 mb-6">
+      <div className="hero-bg border border-border rounded-xl p-6 sm:p-8 mb-6 min-h-[200px] flex flex-col justify-center">
         <p className="text-accent font-display font-bold text-sm uppercase tracking-wider mb-2">
           Official
         </p>

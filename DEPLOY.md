@@ -28,8 +28,9 @@ push-to-github.bat https://github.com/YOUR_USERNAME/SS-Tournaments.git
 ## 3. Turn on GitHub Pages
 
 1. On the repo: **Settings → Pages**
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**
-3. After the first push, the workflow runs and deploys the site
+2. Under **Build and deployment**, set **Source** to **GitHub Actions** (not "Deploy from a branch").  
+   If you use a branch as the source, the site will show the README instead of the built app.
+3. After the first push (or re-run the workflow from the Actions tab), the site deploys.
 4. Site URL: `https://YOUR_USERNAME.github.io/SS-Tournaments/`
 
 ## 4. MCP-style Rules Bot and message board
