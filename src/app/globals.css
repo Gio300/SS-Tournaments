@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0B0E14;
+  --panel: #141824;
+  --accent: #E10600;
+  --accent-secondary: #FF8C00;
+  --text-primary: #F5F7FA;
+  --text-muted: #9AA4B2;
+  --border: #2A2F45;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* High contrast focus for accessibility */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Rule icons */
+.rule-ban::before { content: '❌'; margin-right: 0.5rem; }
+.rule-restriction::before { content: '⚠️'; margin-right: 0.5rem; }
+.rule-allowed::before { content: '✅'; margin-right: 0.5rem; }

@@ -1,0 +1,29 @@
+import type { Metadata } from 'next';
+import { Inter, Orbitron } from 'next/font/google';
+import './globals.css';
+import { Nav } from '@/components/Nav';
+import { Footer } from '@/components/Footer';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-orbitron' });
+
+export const metadata: Metadata = {
+  title: 'smL Tournament Rules Hub',
+  description: 'Official smL tournament rules, restrictions, and clarifications. Single source of truth for competitive play.',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" className={`${inter.variable} ${orbitron.variable}`}>
+      <body className="font-sans antialiased min-h-screen flex flex-col">
+        <Nav />
+        <main className="flex-1">{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}
