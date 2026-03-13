@@ -43,7 +43,7 @@ button:focus-visible {
       rgba(11, 14, 20, 0.85) 40%,
       rgba(11, 14, 20, 0.9) 100%
     ),
-    url('/bg-pattern.png.svg');
+    url('/bg-pattern.png');
   background-size: cover;
   background-position: center;
   background-repeat: repeat;

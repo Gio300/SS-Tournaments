@@ -34,12 +34,14 @@ const synonyms: Record<string, string[]> = {
   baryon: ['baryon', 'baryon mode', 'baryon ult'],
   temari: ['temari', 'temari sea dragon', 'temari ult'],
   crystal: ['crystal', 'crystal ice mirrors', 'ice mirrors', 'crystal ult'],
-  izanami: ['izanami', 'izanami jutsu', 'izanami ult'],
-  tsukuyomi: ['tsukuyomi', 'infinite tsukuyomi', 'infinite tsukuyomi jutsu', 'tsukuyomi ult'],
-  konan: ['konan', 'konan papers', 'papers', 'konan ult'],
+  izanami: ['izanami', 'izanami jutsu', 'izanami ult', 'izanmi', 'izunami'],
+  tsukuyomi: ['tsukuyomi', 'infinite tsukuyomi', 'infinite tsukuyomi jutsu', 'tsukuyomi ult', 'tsukyomi', 'tsukiyomi'],
+  konan: ['konan', 'konan papers', 'papers', 'konan ult', 'konnan', 'konan paper'],
   karma: ['karma', 'defense karma', 'karma jutsu', 'karma ult'],
-  kawaki: ['kawaki', 'kawaki strange taste', 'strange taste', 'kawaki ult'],
-  hashirama: ['hashirama', 'hashirama jutsu', 'hashirama ult'],
+  kawaki: ['kawaki', 'kawaki strange taste', 'strange taste', 'kawaki ult', 'kawki', 'kawaki taste'],
+  hashirama: ['hashirama', 'hashirama jutsu', 'hashirama ult', 'hashirma', 'hashrama'],
+  amaterasu: ['amaterasu', 'amaterasu burn', 'amaterasu burns', 'amterasu'],
+  kusanagi: ['kusanagi', 'kusanagi variant', 'kusanagi variants', 'kusangi'],
   // Classes
   ranger: ['ranger', 'range', 'rang'],
   tank: ['tank', 'defense', 'def'],
@@ -63,7 +65,7 @@ function expandSynonyms(word: string): string[] {
     }
   }
   
-  return [...new Set(expanded)];
+  return Array.from(new Set(expanded));
 }
 
 function tokenize(s: string): string[] {
@@ -80,7 +82,7 @@ function tokenize(s: string): string[] {
     expanded.push(...expandSynonyms(token));
   }
   
-  return [...new Set(expanded)];
+  return Array.from(new Set(expanded));
 }
 
 function scoreRule(keywords: string[], section: string, text: string): number {

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 const links = [
   { href: '/', label: 'Home' },
@@ -11,11 +12,16 @@ const links = [
   { href: '/faq/', label: 'FAQ' },
   { href: '/ask/', label: 'Rules Bot' },
   { href: '/community/', label: 'Community' },
+  { href: '/reels/', label: 'Reels' },
+  { href: '/matches/', label: 'Matches' },
+  { href: '/boards/', label: 'Clans' },
+  { href: '/live/', label: 'Live' },
 ];
 
 export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { user, profile } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 bg-panel/95 backdrop-blur border-b border-border">
@@ -54,6 +60,19 @@ export function Nav() {
               </li>
             );
           })}
+          <li>
+            <Link
+              href={user ? '/profile/' : '/login/'}
+              onClick={() => setOpen(false)}
+              className={`block sm:inline-block px-4 py-3 sm:py-2 sm:px-3 rounded text-sm font-medium transition ${
+                pathname?.startsWith('/profile') || pathname?.startsWith('/login')
+                  ? 'text-accent bg-accent/10'
+                  : 'text-text-muted hover:text-text-primary hover:bg-white/5'
+              }`}
+            >
+              {user ? (profile?.username ?? 'Profile') : 'Sign in'}
+            </Link>
+          </li>
         </ul>
       </nav>
     </header>

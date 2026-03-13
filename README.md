@@ -1,5 +1,7 @@
 # smL Tournament Rules Hub
 
+Includes **StrikerClips**: highlight reels (combine 4–8 clips), matches, Discord-style boards, auth.
+
 **Live site:** https://gio300.github.io/SS-Tournaments/  
 If you see this README there instead of the app, see [PAGES_SETUP.md](PAGES_SETUP.md).
 
@@ -29,15 +31,19 @@ Copy `.env.example` to `.env.local` and set:
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` if you use the **Community Board**.
 - `NEXT_PUBLIC_CF_WORKER_URL` if you want **AI-powered Rules Bot** (see Cloudflare Worker setup below).
 
-To enable the board:
+To enable the board and StrikerClips (reels, matches, boards, auth):
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In the SQL Editor, run the script in `supabase/schema.sql`.
-3. Add the project URL and anon key to `.env.local`.
+2. In the SQL Editor, run `supabase/schema.sql` (community board).
+3. Run `supabase/strikerclips_schema.sql` (profiles, clips, reels, matches, servers, channels, messages, storage).
+4. Enable Auth providers (Email, Google, GitHub) in Supabase Dashboard.
+5. Add the project URL and anon key to `.env.local`.
 
 Without Supabase, the rest of the site (Rules, FAQ, Rules Bot) works; the Community page will show a loading error for the feed.
 
 Without Cloudflare Worker, the Rules Bot uses enhanced keyword matching (with synonym expansion and partial word matching).
+
+**Cloudflare Worker deployment:** See [CLOUDFLARE_SETUP.md](CLOUDFLARE_SETUP.md) for step-by-step instructions to deploy the AI Rules Bot worker.
 
 ## Build (static export)
 

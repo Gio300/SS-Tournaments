@@ -33,16 +33,42 @@ push-to-github.bat https://github.com/YOUR_USERNAME/SS-Tournaments.git
 3. After the first push (or re-run the workflow from the Actions tab), the site deploys.
 4. Site URL: `https://YOUR_USERNAME.github.io/SS-Tournaments/`
 
-## 4. MCP-style Rules Bot and message board
+## 4. Supabase (Community, Clans, Reels, Matches, Live Streams)
 
-- **Rules Bot** (`/ask`): Runs entirely in the browser; no extra setup. It uses the rules in the repo.
-- **Community board** (`/community`): Needs Supabase:
-  1. Create a project at https://supabase.com
-  2. Run `supabase/schema.sql` in the SQL Editor
-  3. In the repo on GitHub: **Settings → Secrets and variables → Actions**
-  4. Add:
-     - `NEXT_PUBLIC_SUPABASE_URL` = your project URL
-     - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your anon key
-  5. Re-run the **Deploy to GitHub Pages** workflow (Actions tab → Run workflow)
+1. Create a project at https://supabase.com
+2. In the SQL Editor, run in order:
+   - `supabase/schema.sql` (community board)
+   - `supabase/strikerclips_schema.sql` (profiles, clips, reels, matches, clans, live_streams)
+3. Enable Auth: **Authentication → Providers** – enable Email, Google, GitHub as needed
 
-After that, the live site will have the Rules Bot and the community board.
+## 5. Cloudflare Worker (Rules Bot + AI Director)
+
+1. Install Wrangler: `npm install -g wrangler`
+2. Deploy the worker:
+   ```bash
+   cd cloudflare-worker
+   npm install
+   wrangler login
+   wrangler deploy
+   ```
+3. Copy the worker URL (e.g. `https://sml-rules-bot.YOUR-SUBDOMAIN.workers.dev`)
+4. One-time: Accept Llama Vision license by sending:
+   ```bash
+   curl -X POST "YOUR_WORKER_URL/director" -H "Content-Type: application/json" -d '{"action":"agree"}'
+   ```
+
+## 6. GitHub Actions Secrets
+
+In the repo: **Settings → Secrets and variables → Actions**, add:
+
+- `NEXT_PUBLIC_SUPABASE_URL` = your Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Supabase anon key
+- `NEXT_PUBLIC_CF_WORKER_URL` = your Cloudflare Worker URL (e.g. `https://sml-rules-bot.xxx.workers.dev`)
+
+Re-run the **Deploy to GitHub Pages** workflow (Actions tab → Run workflow).
+
+## 7. What You Get
+
+- **Rules Bot** (`/ask`): AI-powered via Cloudflare (Llama 3.1 8B); falls back to keyword matching if no worker URL
+- **AI Director** (`/live/director`): Vision model switches between up to 8 live streams
+- **Community board** (`/community`), **Clans** (`/boards`), **Reels**, **Matches**, **Live Streams**

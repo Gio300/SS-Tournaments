@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot } from 'lucide-react';
-import { getBotReply, type BotMessage } from '@/lib/rulesBot';
+import { getAIBotReply, type BotMessage } from '@/lib/rulesBot';
 
 export default function AskPage() {
   const [messages, setMessages] = useState<BotMessage[]>([]);
@@ -42,8 +42,11 @@ export default function AskPage() {
       <h1 className="font-display text-2xl sm:text-3xl font-bold text-text-primary mb-2">
         Rules Bot
       </h1>
-      <p className="text-text-muted mb-6">
+      <p className="text-text-muted mb-6 flex items-center gap-2 flex-wrap">
         Have questions? Ask the Rules Bot. Answers are based only on official smL rules.
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-accent/20 text-accent border border-accent/40">
+          AI-Powered
+        </span>
       </p>
 
       <div className="bg-panel border border-border rounded-xl flex flex-col overflow-hidden min-h-[60vh] sm:min-h-[400px]">
