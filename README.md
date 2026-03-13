@@ -1,11 +1,11 @@
-# smL Tournament Rules Hub
+# SmashHub
 
-Includes **StrikerClips**: highlight reels (combine 4–8 clips), matches, Discord-style boards, auth.
+**SmashHub** – Tournament rules, reels, matches, clans, and live streams. Single source of truth for competitive play.
+
+Includes **StrikerClips**: highlight reels (combine 4–8 clips), matches, Discord-style clans, auth.
 
 **Live site:** https://gio300.github.io/SS-Tournaments/  
 If you see this README there instead of the app, see [PAGES_SETUP.md](PAGES_SETUP.md).
-
-Official website for **smL tournament rules**: single source of truth, rules index, FAQ, rules bot, and community board.
 
 ## Tech stack
 
@@ -109,4 +109,4 @@ To add Shinobi Striker / Naruto-to-Boruto themed background and hero images, see
 
 ---
 
-Updated 02/01/26 – smL Tournament Rules
+Updated 02/01/26 – SmashHub

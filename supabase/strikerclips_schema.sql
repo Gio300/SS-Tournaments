@@ -240,7 +240,7 @@ exception when duplicate_object then null;
 end $$;
 
 insert into public.servers (id, name, clan_tag) 
-values ('00000000-0000-0000-0000-000000000001', 'smL Highlights', 'SML')
+values ('00000000-0000-0000-0000-000000000001', 'SmashHub Highlights', 'SML')
 on conflict (id) do update set name = excluded.name, clan_tag = coalesce(excluded.clan_tag, servers.clan_tag);
 
 insert into public.channels (server_id, name, type) 

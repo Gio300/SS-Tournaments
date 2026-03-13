@@ -104,7 +104,7 @@ function scoreRule(keywords: string[], section: string, text: string): number {
 // Fallback keyword-based matching (used when AI is unavailable)
 export function getBotReply(userMessage: string): string {
   const trimmed = userMessage.trim();
-  if (!trimmed) return 'Please ask a question about the smL tournament rules.';
+  if (!trimmed) return 'Please ask a question about the tournament rules.';
 
   const keywords = tokenize(trimmed);
 
@@ -145,7 +145,7 @@ export function getBotReply(userMessage: string): string {
 // AI-powered bot reply using Cloudflare Workers AI
 export async function getAIBotReply(userMessage: string): Promise<string> {
   const trimmed = userMessage.trim();
-  if (!trimmed) return 'Please ask a question about the smL tournament rules.';
+  if (!trimmed) return 'Please ask a question about the tournament rules.';
 
   const workerUrl = process.env.NEXT_PUBLIC_CF_WORKER_URL;
   

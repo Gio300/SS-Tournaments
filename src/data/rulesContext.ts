@@ -8,7 +8,7 @@ import { RULES_SECTIONS, FAQ_ENTRIES } from './rules';
 export function getRulesContext(): string {
   const sections: string[] = [];
 
-  sections.push('=== smL TOURNAMENT RULES ===\n');
+  sections.push('=== SmashHub TOURNAMENT RULES ===\n');
   sections.push('Updated: 02/01/26\n\n');
 
   for (const section of RULES_SECTIONS) {

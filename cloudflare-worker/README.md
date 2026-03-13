@@ -1,4 +1,4 @@
-# Cloudflare Worker for smL Rules Bot
+# Cloudflare Worker for SmashHub Rules Bot
 
 This Cloudflare Worker uses Workers AI (Llama 3.1 8B Instruct) to power the Rules Bot with better understanding of questions, partial words, and game terminology.
 

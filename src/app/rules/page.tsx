@@ -10,7 +10,7 @@ export default function RulesHubPage() {
           Official
         </p>
         <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary mb-3">
-          smL Tournament Rules Hub
+          SmashHub – Tournament Rules
         </h1>
         <p className="text-text-muted text-lg sm:text-xl">
           Official Rules · Restrictions · Clarifications

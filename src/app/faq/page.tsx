@@ -8,7 +8,7 @@ export default function FAQPage() {
         FAQ
       </h1>
       <p className="text-text-muted mb-8">
-        Common questions about smL tournament rules.
+        Common questions about tournament rules.
       </p>
       <FaqAccordion entries={FAQ_ENTRIES} />
     </div>

@@ -43,7 +43,7 @@ export default function AskPage() {
         Rules Bot
       </h1>
       <p className="text-text-muted mb-6 flex items-center gap-2 flex-wrap">
-        Have questions? Ask the Rules Bot. Answers are based only on official smL rules.
+        Have questions? Ask the Rules Bot. Answers are based only on official tournament rules.
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-accent/20 text-accent border border-accent/40">
           AI-Powered
         </span>

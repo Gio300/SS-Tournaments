@@ -27,7 +27,7 @@ export function Nav() {
     <header className="sticky top-0 z-50 bg-panel/95 backdrop-blur border-b border-border">
       <nav className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
         <Link href="/" className="font-display font-bold text-lg text-text-primary hover:text-accent transition">
-          smL Rules
+          SmashHub
         </Link>
 
         <button

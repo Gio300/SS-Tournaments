@@ -1,5 +1,5 @@
 /**
- * smL Tournament Rules — SINGLE SOURCE OF TRUTH
+ * SmashHub Tournament Rules — SINGLE SOURCE OF TRUTH
  * Updated 02/01/26
  */
 
