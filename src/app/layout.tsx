@@ -3,6 +3,7 @@ import Script from 'next/script';
 import { Inter, Orbitron } from 'next/font/google';
 import './globals.css';
 import { Nav } from '@/components/Nav';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import { Footer } from '@/components/Footer';
 import { RulesBotFab } from '@/components/RulesBotFab';
 import { PwaRegister } from '@/components/PwaRegister';
@@ -39,16 +40,18 @@ export default function RootLayout({
         />
       )}
       <body className="font-sans antialiased min-h-screen flex flex-col relative">
+        <ThemeProvider>
         <div
           className="fixed inset-0 -z-10 bg-app-background"
           style={bgImageUrl ? { backgroundImage: bgImageUrl } : undefined}
-          aria-hidden
-        />
-        <PwaRegister />
-        <Nav />
-        <main className="flex-1 relative z-0">{children}</main>
-        <RulesBotFab />
-        <Footer />
+            aria-hidden
+          />
+          <PwaRegister />
+          <Nav />
+          <main className="flex-1 relative z-0">{children}</main>
+          <RulesBotFab />
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

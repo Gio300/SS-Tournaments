@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Sun, Moon } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/components/ThemeProvider';
 
 const primaryLinks = [
   { href: '/', label: 'Home' },
@@ -29,6 +30,7 @@ export function Nav() {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLLIElement>(null);
   const { user, profile } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -45,10 +47,20 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 bg-panel/95 backdrop-blur border-b border-border">
       <nav className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
-        <Link href="/" className="font-display font-bold text-lg text-text-primary hover:text-accent transition">
-          SmashHub
+        <Link href="/" className="font-display font-bold text-lg transition flex items-center gap-0.5">
+          <span className={theme === 'light' ? 'text-red-600 hover:text-red-700' : 'text-accent hover:text-accent/90'}>Smash</span>
+          <span className={theme === 'light' ? 'text-green-600 hover:text-green-700' : 'text-accent hover:text-accent/90'}>Hub</span>
         </Link>
 
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2 rounded text-text-muted hover:text-text-primary hover:bg-white/5 transition"
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
         <button
           type="button"
           className="sm:hidden p-2 text-text-primary hover:text-accent"
@@ -57,6 +69,7 @@ export function Nav() {
         >
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
+        </div>
 
         <ul
           className={`absolute top-full left-0 right-0 bg-panel border-b border-border sm:border-0 sm:static sm:flex sm:gap-1 ${
@@ -110,19 +123,17 @@ export function Nav() {
               </div>
             )}
           </li>
-          <li>
-            <Link
-              href={user ? '/profile/' : '/login/'}
-              onClick={() => setOpen(false)}
-              className={`block sm:inline-block px-4 py-3 sm:py-2 sm:px-3 rounded text-sm font-medium transition ${
-                pathname?.startsWith('/profile') || pathname?.startsWith('/login')
-                  ? 'text-accent bg-accent/10'
-                  : 'text-text-muted hover:text-text-primary hover:bg-white/5'
-              }`}
-            >
-              {user ? (profile?.username ?? 'Profile') : 'Sign in'}
-            </Link>
-          </li>
+          {!user && (
+            <li>
+              <Link
+                href="/login/"
+                onClick={() => setOpen(false)}
+                className="block sm:inline-block px-4 py-3 sm:py-2 sm:px-3 rounded text-sm font-medium text-text-muted hover:text-text-primary hover:bg-white/5 transition"
+              >
+                Sign in
+              </Link>
+            </li>
+          )}
         </ul>
       </nav>
     </header>

@@ -1,4 +1,5 @@
 import { LiveStreamsClient } from './LiveStreamsClient';
+import { OBSControl } from '@/components/OBSControl';
 
 export default function LivePage() {
   return (
@@ -10,6 +11,9 @@ export default function LivePage() {
         Watch and share live streams from the community. Add YouTube links to stream.
       </p>
       <LiveStreamsClient />
+      <div className="mt-12">
+        <OBSControl />
+      </div>
     </div>
   );
 }

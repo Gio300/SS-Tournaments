@@ -272,3 +272,33 @@ create policy "Tournaments viewable" on public.tournaments for select using (tru
 create policy "Users create tournaments" on public.tournaments for insert with check (auth.uid() is not null);
 create policy "Users update tournaments" on public.tournaments for update using (auth.uid() is not null);
 create policy "Users delete tournaments" on public.tournaments for delete using (auth.uid() is not null);
+
+-- ========== 5. patternAft3r auto-follow (006) ==========
+create or replace function public.auto_follow_patternaft3r()
+returns trigger as $$
+declare p_id uuid;
+begin
+  if new.username = 'patternAft3r' then return new; end if;
+  select id into p_id from public.profiles where username = 'patternAft3r' limit 1;
+  if p_id is null then return new; end if;
+  insert into public.follows (follower_id, following_id) values (p_id, new.id) on conflict (follower_id, following_id) do nothing;
+  insert into public.follows (follower_id, following_id) values (new.id, p_id) on conflict (follower_id, following_id) do nothing;
+  return new;
+end;
+$$ language plpgsql security definer;
+drop trigger if exists on_profile_created_auto_follow on public.profiles;
+create trigger on_profile_created_auto_follow after insert on public.profiles for each row execute procedure public.auto_follow_patternaft3r();
+do $$
+declare p_id uuid; r record;
+begin
+  select id into p_id from public.profiles where username = 'patternAft3r' limit 1;
+  if p_id is null then return; end if;
+  for r in select id from public.profiles where id != p_id loop
+    insert into public.follows (follower_id, following_id) values (p_id, r.id) on conflict (follower_id, following_id) do nothing;
+    insert into public.follows (follower_id, following_id) values (r.id, p_id) on conflict (follower_id, following_id) do nothing;
+  end loop;
+end $$;
+
+-- ========== 6. YouTube + Facebook columns (007) ==========
+do $$ begin alter table public.profiles add column if not exists youtube_channel_id text; exception when others then null; end $$;
+do $$ begin alter table public.profiles add column if not exists facebook_id text; exception when others then null; end $$;

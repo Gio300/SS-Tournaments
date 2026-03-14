@@ -13,6 +13,55 @@ type ClipInput =
   | { type: 'youtube'; url: string; startSec: number; endSec: number; title?: string }
   | { type: 'upload'; file: File; title?: string }
 
+type TimeMode = 'auto' | 'manual'
+
+const PROGRESS_STEPS = ['Initializing', 'Processing clips', 'Combining videos', 'Uploading', 'Creating reel', 'Finalizing']
+
+function ProcessingPip({
+  show,
+  progress,
+  step,
+  onClose,
+}: {
+  show: boolean
+  progress: number
+  step: string
+  onClose?: () => void
+}) {
+  if (!show) return null
+  const stepIndex = PROGRESS_STEPS.indexOf(step)
+  return (
+    <div className="fixed bottom-4 right-4 z-50 w-80 rounded-xl border border-border bg-panel shadow-xl overflow-hidden">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium text-text-primary">Creating highlight</span>
+          {onClose && (
+            <button type="button" onClick={onClose} className="text-text-muted hover:text-text-primary text-sm">
+              ×
+            </button>
+          )}
+        </div>
+        <div className="h-2 rounded-full bg-[#0B0E14] overflow-hidden mb-2">
+          <div
+            className="h-full bg-accent transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <p className="text-xs text-text-muted">{step}</p>
+        <div className="flex gap-1 mt-2">
+          {PROGRESS_STEPS.map((s, i) => (
+            <div
+              key={s}
+              className={`h-1 flex-1 rounded ${i <= stepIndex ? 'bg-accent' : 'bg-[#0B0E14]'}`}
+              title={s}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function CreateReelContent() {
   const { user } = useAuth()
   const router = useRouter()
@@ -20,11 +69,16 @@ function CreateReelContent() {
   const [title, setTitle] = useState('')
   const [clips, setClips] = useState<ClipInput[]>([])
   const [youtubeUrl, setYoutubeUrl] = useState('')
+  const [timeMode, setTimeMode] = useState<TimeMode>('auto')
+  const [autoSecondsPerClip, setAutoSecondsPerClip] = useState(30)
   const [youtubeStart, setYoutubeStart] = useState('')
   const [youtubeEnd, setYoutubeEnd] = useState('')
   const [savedLinks, setSavedLinks] = useState<UserYoutubeLink[]>([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [pipStep, setPipStep] = useState('')
+  const [pipProgress, setPipProgress] = useState(0)
+  const [showPip, setShowPip] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -38,8 +92,18 @@ function CreateReelContent() {
       setError('Invalid YouTube URL')
       return
     }
-    const start = startSec ?? (parseInt(youtubeStart, 10) || 0)
-    const end = endSec ?? (parseInt(youtubeEnd, 10) || 0)
+    let start: number
+    let end: number
+    if (startSec !== undefined && endSec !== undefined) {
+      start = startSec
+      end = endSec
+    } else if (timeMode === 'auto') {
+      start = 0
+      end = autoSecondsPerClip
+    } else {
+      start = parseInt(youtubeStart, 10) || 0
+      end = parseInt(youtubeEnd, 10) || 0
+    }
     if (end > 0 && end <= start) {
       setError('End time must be after start time')
       return
@@ -54,7 +118,7 @@ function CreateReelContent() {
 
   function autoAddAllSaved() {
     setError('')
-    savedLinks.forEach((link) => addYoutubeClip(link.url, 0, 0))
+    savedLinks.forEach((link) => addYoutubeClip(link.url))
   }
 
   function addFileClip(files: FileList | null) {
@@ -91,13 +155,20 @@ function CreateReelContent() {
     }
 
     setSaving(true)
+    setShowPip(true)
+    setPipStep('Initializing')
+    setPipProgress(5)
 
     try {
       let combinedUrl: string | null = null
 
       if (uploadClips.length >= 4) {
+        setPipStep('Combining videos')
+        setPipProgress(20)
         const blob = await concatVideos(uploadClips.map((c) => c.file))
         if (blob) {
+          setPipStep('Uploading')
+          setPipProgress(60)
           const path = `${user!.id}/${crypto.randomUUID()}.mp4`
           const { error: uploadErr } = await supabase.storage.from('videos').upload(path, blob, {
             contentType: 'video/mp4',
@@ -109,6 +180,8 @@ function CreateReelContent() {
         }
       }
 
+      setPipStep('Processing clips')
+      setPipProgress(uploadClips.length >= 4 ? 70 : 30)
       const clipIds: string[] = []
 
       for (const c of youtubeClips) {
@@ -148,6 +221,8 @@ function CreateReelContent() {
         if (clipData) clipIds.push(clipData.id)
       }
 
+      setPipStep('Creating reel')
+      setPipProgress(90)
       const { data: reelData, error: reelErr } = await supabase
         .from('reels')
         .insert({
@@ -160,9 +235,12 @@ function CreateReelContent() {
         .single()
 
       if (reelErr) throw reelErr
+      setPipStep('Finalizing')
+      setPipProgress(100)
       router.push(`/reels/${reelData.id}/`)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create reel')
+      setShowPip(false)
     } finally {
       setSaving(false)
     }
@@ -181,6 +259,74 @@ function CreateReelContent() {
             className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
             placeholder="Weekend Match Highlights"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm text-text-muted mb-2">Add YouTube clip (URL)</label>
+          <p className="text-xs text-text-muted mb-2">Paste a URL and add. No need to save to Profile first.</p>
+          <div className="flex flex-wrap gap-2 items-center">
+            <input
+              type="text"
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="https://youtube.com/watch?v=..."
+              className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
+            />
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setTimeMode('auto')}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  timeMode === 'auto' ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'
+                }`}
+              >
+                Auto
+              </button>
+              <button
+                type="button"
+                onClick={() => setTimeMode('manual')}
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  timeMode === 'manual' ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'
+                }`}
+              >
+                Manual
+              </button>
+            </div>
+            {timeMode === 'auto' && (
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-text-muted">Seconds per clip:</label>
+                <input
+                  type="number"
+                  min={5}
+                  max={600}
+                  value={autoSecondsPerClip}
+                  onChange={(e) => setAutoSecondsPerClip(Math.max(5, Math.min(600, parseInt(e.target.value, 10) || 30)))}
+                  className="w-20 px-2 py-1 rounded bg-panel border border-border text-text-primary text-sm"
+                />
+              </div>
+            )}
+            {timeMode === 'manual' && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={youtubeStart}
+                  onChange={(e) => setYoutubeStart(e.target.value)}
+                  placeholder="Start (sec)"
+                  className="w-24 px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
+                />
+                <input
+                  type="number"
+                  value={youtubeEnd}
+                  onChange={(e) => setYoutubeEnd(e.target.value)}
+                  placeholder="End (sec)"
+                  className="w-24 px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
+                />
+              </div>
+            )}
+            <button type="button" onClick={() => addYoutubeClip()} className="px-4 py-2 rounded-lg border border-accent text-accent hover:bg-accent/10">
+              Add
+            </button>
+          </div>
         </div>
 
         <div>
@@ -209,40 +355,9 @@ function CreateReelContent() {
             </>
           ) : (
             <p className="text-sm text-text-muted">
-              Save YouTube links in your{' '}
-              <Link href="/profile/" className="text-accent hover:underline">Profile</Link> to use Auto-add. One click adds all saved clips.
+              <Link href="/profile/" className="text-accent hover:underline">Save links in Profile</Link> for quick Auto-add. Or paste URLs above.
             </p>
           )}
-        </div>
-
-        <div>
-          <label className="block text-sm text-text-muted mb-2">Add YouTube clip (URL)</label>
-          <div className="flex flex-wrap gap-2">
-            <input
-              type="text"
-              value={youtubeUrl}
-              onChange={(e) => setYoutubeUrl(e.target.value)}
-              placeholder="https://youtube.com/watch?v=..."
-              className="flex-1 min-w-[200px] px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
-            />
-            <input
-              type="number"
-              value={youtubeStart}
-              onChange={(e) => setYoutubeStart(e.target.value)}
-              placeholder="Start (sec)"
-              className="w-24 px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
-            />
-            <input
-              type="number"
-              value={youtubeEnd}
-              onChange={(e) => setYoutubeEnd(e.target.value)}
-              placeholder="End (sec)"
-              className="w-24 px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
-            />
-            <button type="button" onClick={() => addYoutubeClip()} className="px-4 py-2 rounded-lg border border-accent text-accent hover:bg-accent/10">
-              Add
-            </button>
-          </div>
         </div>
 
         <div>
@@ -264,6 +379,7 @@ function CreateReelContent() {
                 <li key={i} className="flex items-center justify-between py-2 px-3 rounded-lg bg-panel border border-border">
                   <span className="truncate text-sm text-text-primary">
                     {c.type === 'youtube' ? c.url : c.file.name}
+                    {c.type === 'youtube' && (c.startSec > 0 || c.endSec > 0) && ` (${c.startSec}s–${c.endSec}s)`}
                   </span>
                   <button type="button" onClick={() => removeClip(i)} className="text-accent hover:opacity-80 text-sm">
                     Remove
@@ -275,16 +391,21 @@ function CreateReelContent() {
         )}
 
         {error && <p className="text-accent text-sm">{error}</p>}
-        {ffmpegLoading && <p className="text-accent text-sm">Combining videos... {progress}%</p>}
 
         <button
           type="submit"
           disabled={saving || ffmpegLoading || clips.length === 0}
           className="w-full py-3 rounded-lg bg-accent text-white font-semibold hover:opacity-90 disabled:opacity-50"
         >
-          {saving ? 'Saving...' : 'Create Highlight'}
+          {saving ? 'Creating...' : 'Create Highlight'}
         </button>
       </form>
+
+      <ProcessingPip
+        show={showPip && (saving || ffmpegLoading)}
+        progress={ffmpegLoading ? progress : pipProgress}
+        step={ffmpegLoading ? 'Combining videos' : pipStep || 'Initializing'}
+      />
     </div>
   )
 }
@@ -301,4 +422,3 @@ export default function CreateReelPage() {
     </AuthGuard>
   )
 }
-
