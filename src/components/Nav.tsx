@@ -8,14 +8,13 @@ import { useAuth } from '@/hooks/useAuth';
 
 const links = [
   { href: '/', label: 'Home' },
-  { href: '/rules/', label: 'Rules' },
-  { href: '/faq/', label: 'FAQ' },
-  { href: '/ask/', label: 'Rules Bot' },
-  { href: '/community/', label: 'Community' },
-  { href: '/reels/', label: 'Reels' },
-  { href: '/matches/', label: 'Matches' },
+  { href: '/tournaments/', label: 'Tournaments' },
   { href: '/boards/', label: 'Clans' },
   { href: '/live/', label: 'Live' },
+  { href: '/ask/', label: 'Rules Bot' },
+  { href: '/rules/', label: 'Rules' },
+  { href: '/faq/', label: 'FAQ' },
+  { href: '/community/', label: 'Community' },
 ];
 
 export function Nav() {

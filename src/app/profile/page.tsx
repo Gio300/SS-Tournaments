@@ -6,12 +6,15 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { AuthGuard } from '@/components/AuthGuard'
-import type { Reel } from '@/types/database'
+import type { Reel, UserYoutubeLink } from '@/types/database'
 
 function ProfileContent() {
   const { user, profile } = useAuth()
   const router = useRouter()
   const [reels, setReels] = useState<Reel[]>([])
+  const [youtubeLinks, setYoutubeLinks] = useState<UserYoutubeLink[]>([])
+  const [newYoutubeUrl, setNewYoutubeUrl] = useState('')
+  const [addingLink, setAddingLink] = useState(false)
   const [editing, setEditing] = useState(false)
   const [username, setUsername] = useState('')
   const [bio, setBio] = useState('')
@@ -25,15 +28,32 @@ function ProfileContent() {
     if (!user) return
     const userId = user.id
     async function fetch() {
-      const { data } = await supabase
-        .from('reels')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-      setReels(data ?? [])
+      const [reelsRes, linksRes] = await Promise.all([
+        supabase.from('reels').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+        supabase.from('user_youtube_links').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      ])
+      setReels(reelsRes.data ?? [])
+      setYoutubeLinks(linksRes.data ?? [])
     }
     fetch()
   }, [user?.id])
+
+  async function addYoutubeLink(e: React.FormEvent) {
+    e.preventDefault()
+    if (!user || !newYoutubeUrl.trim()) return
+    const url = newYoutubeUrl.trim()
+    if (!/youtube\.com|youtu\.be/.test(url)) return
+    setAddingLink(true)
+    const { data } = await supabase.from('user_youtube_links').insert({ user_id: user.id, url }).select().single()
+    if (data) setYoutubeLinks((prev) => [data, ...prev])
+    setNewYoutubeUrl('')
+    setAddingLink(false)
+  }
+
+  async function removeYoutubeLink(id: string) {
+    await supabase.from('user_youtube_links').delete().eq('id', id)
+    setYoutubeLinks((prev) => prev.filter((l) => l.id !== id))
+  }
 
   async function handleSave() {
     if (!user) return
@@ -103,6 +123,39 @@ function ProfileContent() {
           Sign out
         </button>
       </div>
+
+      <h2 className="text-lg font-semibold text-text-primary mb-4">My YouTube Sources</h2>
+      <p className="text-text-muted text-sm mb-4">Save YouTube URLs to use when creating highlights.</p>
+      <form onSubmit={addYoutubeLink} className="flex gap-2 mb-4">
+        <input
+          type="url"
+          value={newYoutubeUrl}
+          onChange={(e) => setNewYoutubeUrl(e.target.value)}
+          placeholder="https://youtube.com/watch?v=..."
+          className="flex-1 px-4 py-2 rounded-lg bg-panel border border-border text-text-primary"
+        />
+        <button type="submit" disabled={addingLink || !newYoutubeUrl.trim()} className="px-4 py-2 rounded-lg border border-accent text-accent hover:bg-accent/10 disabled:opacity-50">
+          Add
+        </button>
+      </form>
+      <div className="space-y-2 mb-8">
+        {youtubeLinks.map((link) => (
+          <div key={link.id} className="flex items-center justify-between rounded-lg bg-panel border border-border p-2">
+            <span className="truncate text-sm text-text-primary">{link.url}</span>
+            <button onClick={() => removeYoutubeLink(link.id)} className="text-accent hover:opacity-80 text-sm ml-2">
+              Remove
+            </button>
+          </div>
+        ))}
+        {youtubeLinks.length === 0 && <p className="text-text-muted text-sm">No saved links yet.</p>}
+      </div>
+
+      <div className="mb-6">
+        <Link href="/reels/create/" className="inline-block px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90">
+          Create Highlight
+        </Link>
+      </div>
+
       <h2 className="text-lg font-semibold text-text-primary mb-4">My Reels</h2>
       <div className="space-y-4">
         {reels.map((reel) => (

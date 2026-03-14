@@ -51,6 +51,29 @@ export interface LiveStream {
   created_at: string
 }
 
+export interface LiveGroup {
+  id: string
+  name: string
+  creator_id: string | null
+  created_at: string
+}
+
+export interface LiveGroupMember {
+  id: string
+  group_id: string
+  user_id: string
+  stream_id: string | null
+  accepted: boolean
+}
+
+export interface UserYoutubeLink {
+  id: string
+  user_id: string
+  url: string
+  title: string | null
+  created_at: string
+}
+
 export interface Server {
   id: string
   name: string

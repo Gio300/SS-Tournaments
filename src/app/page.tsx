@@ -98,10 +98,28 @@ export default function HomePage() {
 
       <AdSlot slotId="home-between-cards" className="mb-8" />
 
-      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
+        <Link
+          href="/reels/create/"
+          className="flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition"
+        >
+          Create Highlight
+        </Link>
+        <Link
+          href="/reels/"
+          className="flex items-center justify-center gap-2 bg-panel border border-border hover:border-accent text-text-primary font-semibold py-3 px-6 rounded-lg transition"
+        >
+          Browse Reels
+        </Link>
+        <Link
+          href="/live/"
+          className="flex items-center justify-center gap-2 bg-panel border border-border hover:border-accent text-text-primary font-semibold py-3 px-6 rounded-lg transition"
+        >
+          Live Now
+        </Link>
         <Link
           href="/login/"
-          className="flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition"
+          className="flex items-center justify-center gap-2 bg-panel border border-border hover:border-accent text-text-primary font-semibold py-3 px-6 rounded-lg transition"
         >
           Sign in
         </Link>
@@ -109,7 +127,7 @@ export default function HomePage() {
           href="/rules/"
           className="flex items-center justify-center gap-2 bg-panel border border-border hover:border-accent text-text-primary font-semibold py-3 px-6 rounded-lg transition"
         >
-          View Tournament Rules
+          Tournament Rules
         </Link>
       </div>
 
