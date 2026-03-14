@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
 const basePath = process.env.GITHUB_REPO ? `/${process.env.GITHUB_REPO}` : '';
 const nextConfig = {
   output: 'export',
@@ -12,6 +13,10 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: false,
+  },
+  webpack: (config) => {
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+    return config;
   },
 };
 

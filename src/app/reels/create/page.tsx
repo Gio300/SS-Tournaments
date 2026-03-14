@@ -37,8 +37,8 @@ function CreateReelContent() {
       setError('Invalid YouTube URL')
       return
     }
-    const start = startSec ?? parseInt(youtubeStart, 10) || 0
-    const end = endSec ?? parseInt(youtubeEnd, 10) || 0
+    const start = startSec ?? (parseInt(youtubeStart, 10) || 0)
+    const end = endSec ?? (parseInt(youtubeEnd, 10) || 0)
     if (end > 0 && end <= start) {
       setError('End time must be after start time')
       return
