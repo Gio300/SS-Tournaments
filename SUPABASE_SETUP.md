@@ -2,19 +2,15 @@
 
 ## 1. Run Database Migrations (fixes 404 / "Failed to create reel")
 
-Your Supabase project needs these tables. Run each SQL file **in order** in the [Supabase SQL Editor](https://supabase.com/dashboard/project/siwcdegiavwcvgjegiww/sql/new):
-
-1. **strikerclips_schema.sql** – Base tables (profiles, clips, reels, matches, servers, storage, etc.)
-2. **003_live_groups_youtube.sql** – Live groups, `user_youtube_links` (for saved links & Auto-add)
-3. **004_subscriptions_clans.sql** – Subscriptions, clan subscriptions, server applications
-4. **005_tournaments.sql** – Tournaments table
+**One-step option:** Open `supabase/RUN_ALL_MIGRATIONS.sql`, copy the entire file, paste into the [Supabase SQL Editor](https://supabase.com/dashboard/project/siwcdegiavwcvgjegiww/sql/new), and click **Run**.
 
 **Steps:**
-1. Go to https://supabase.com/dashboard/project/siwcdegiavwcvgjegiww/sql/new
-2. Copy the contents of `supabase/strikerclips_schema.sql` → Run
-3. Copy `supabase/003_live_groups_youtube.sql` → Run
-4. Copy `supabase/004_subscriptions_clans.sql` → Run
-5. Copy `supabase/005_tournaments.sql` → Run
+1. Sign in at https://supabase.com/dashboard (if needed)
+2. Go to https://supabase.com/dashboard/project/siwcdegiavwcvgjegiww/sql/new
+3. Open `supabase/RUN_ALL_MIGRATIONS.sql` in your editor
+4. Select all (Ctrl+A), copy
+5. Paste into the SQL editor
+6. Click **Run** (or Ctrl+Enter)
 
 ## 2. Change Email Branding (Supabase → SmashHub)
 
