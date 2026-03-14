@@ -1,6 +1,7 @@
 /**
  * Ad slot configuration.
  * Use NEXT_PUBLIC_ADS_SLOTS JSON env for overrides, or define defaults here.
+ * When NEXT_PUBLIC_ADSENSE_CLIENT is set, slots can use type 'adsense'.
  */
 
 export type AdSlotType = 'custom' | 'adsense';
@@ -14,12 +15,22 @@ export interface AdSlotConfig {
   paths?: string[];
 }
 
-const defaultSlots: AdSlotConfig[] = [
-  { slotId: 'home-hero-below', type: 'custom', paths: ['/'] },
-  { slotId: 'home-between-cards', type: 'custom', paths: ['/'] },
-  { slotId: 'home-footer', type: 'custom', paths: ['/'] },
-  { slotId: 'rules-hero-below', type: 'custom', paths: ['/rules'] },
-];
+const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
+const adsenseSlot = process.env.NEXT_PUBLIC_ADSENSE_SLOT || 'auto';
+
+const defaultSlots: AdSlotConfig[] = adsenseClient
+  ? [
+      { slotId: 'home-hero-below', type: 'adsense', content: adsenseSlot, paths: ['/'] },
+      { slotId: 'home-between-cards', type: 'adsense', content: adsenseSlot, paths: ['/'] },
+      { slotId: 'home-footer', type: 'adsense', content: adsenseSlot, paths: ['/'] },
+      { slotId: 'rules-hero-below', type: 'adsense', content: adsenseSlot, paths: ['/rules'] },
+    ]
+  : [
+      { slotId: 'home-hero-below', type: 'custom', paths: ['/'] },
+      { slotId: 'home-between-cards', type: 'custom', paths: ['/'] },
+      { slotId: 'home-footer', type: 'custom', paths: ['/'] },
+      { slotId: 'rules-hero-below', type: 'custom', paths: ['/rules'] },
+    ];
 
 function getSlotsFromEnv(): AdSlotConfig[] | null {
   const env = process.env.NEXT_PUBLIC_ADS_SLOTS;

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import type { LiveGroup } from '@/types/database';
 
 function extractYouTubeId(url: string): string | null {
@@ -17,6 +18,7 @@ type GroupWithMembers = LiveGroup & {
 
 export function LiveStreamsClient() {
   const { user } = useAuth();
+  const { hasPro } = useSubscription();
   const [streams, setStreams] = useState<{ id: string; youtube_url: string; title: string | null }[]>([]);
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [title, setTitle] = useState('');
@@ -25,6 +27,9 @@ export function LiveStreamsClient() {
   const [error, setError] = useState('');
   const [multiView, setMultiView] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(0);
+  const [switchMode, setSwitchMode] = useState<'manual' | 'auto' | 'pro'>('manual');
+  const [autoInterval, setAutoInterval] = useState(30);
+  const [pipHostUrl, setPipHostUrl] = useState('');
 
   const [groups, setGroups] = useState<GroupWithMembers[]>([]);
   const [groupName, setGroupName] = useState('');
@@ -173,6 +178,15 @@ export function LiveStreamsClient() {
       })()
     : streams;
   const displayStreams = viewingGroupId ? groupStreams : streams;
+
+  // Auto-rotate when in auto mode and multi-view
+  useEffect(() => {
+    if (!multiView || displayStreams.length < 2 || switchMode !== 'auto') return;
+    const id = setInterval(() => {
+      setFocusedIndex((prev) => (prev + 1) % Math.min(4, displayStreams.length));
+    }, autoInterval * 1000);
+    return () => clearInterval(id);
+  }, [multiView, displayStreams.length, switchMode, autoInterval]);
 
   if (loading) {
     return (
@@ -335,24 +349,82 @@ export function LiveStreamsClient() {
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
         <h2 className="font-semibold text-text-primary">{viewingGroupId ? 'Group streams' : 'Live now'}</h2>
-        {displayStreams.length >= 2 && (
-          <button
-            type="button"
-            onClick={() => setMultiView(!multiView)}
-            className="px-4 py-2 rounded-lg border border-border text-text-muted hover:text-accent hover:border-accent/50 text-sm"
-          >
-            {multiView ? 'Single view' : 'Multi-view (4-up)'}
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {displayStreams.length >= 2 && (
+            <>
+              <button
+                type="button"
+                onClick={() => setMultiView(!multiView)}
+                className="px-4 py-2 rounded-lg border border-border text-text-muted hover:text-accent hover:border-accent/50 text-sm"
+              >
+                {multiView ? 'Single view' : 'Multi-view (4-up)'}
+              </button>
+              {multiView && (
+                <>
+                  <span className="text-text-muted text-sm">Switch:</span>
+                  <button
+                    type="button"
+                    onClick={() => setSwitchMode('manual')}
+                    className={`px-3 py-1 rounded text-sm ${switchMode === 'manual' ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'}`}
+                  >
+                    Manual
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSwitchMode('auto')}
+                    className={`px-3 py-1 rounded text-sm ${switchMode === 'auto' ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'}`}
+                  >
+                    Auto
+                  </button>
+                  {hasPro && (
+                    <button
+                      type="button"
+                      onClick={() => setSwitchMode('pro')}
+                      className={`px-3 py-1 rounded text-sm ${switchMode === 'pro' ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'}`}
+                      title="Pro: pixel-based action switching"
+                    >
+                      Pro
+                    </button>
+                  )}
+                  {(switchMode === 'auto' || switchMode === 'pro') && (
+                    <select
+                      value={autoInterval}
+                      onChange={(e) => setAutoInterval(Number(e.target.value))}
+                      className="px-2 py-1 rounded bg-panel border border-border text-text-primary text-sm"
+                    >
+                      <option value={15}>15s</option>
+                      <option value={30}>30s</option>
+                      <option value={45}>45s</option>
+                      <option value={60}>1 min</option>
+                    </select>
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </div>
       </div>
       {displayStreams.length === 0 ? (
         <div className="rounded-xl border border-border bg-panel p-8 text-center text-text-muted">
           {viewingGroupId ? 'No streams linked in this group yet.' : 'No streams yet.'}
         </div>
       ) : multiView && displayStreams.length >= 2 ? (
-        <div className="space-y-4">
+        <div className="space-y-4 relative">
+          {pipHostUrl && (
+            <div className="absolute bottom-4 right-4 z-10 w-32 h-24 rounded-lg border-2 border-accent overflow-hidden bg-panel">
+              {extractYouTubeId(pipHostUrl) ? (
+                <iframe
+                  src={`https://www.youtube.com/embed/${extractYouTubeId(pipHostUrl)}`}
+                  title="Host PiP"
+                  className="w-full h-full"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-text-muted text-xs">Host</div>
+              )}
+            </div>
+          )}
           <div className="rounded-xl border-2 border-accent overflow-hidden">
             {(() => {
               const focused = displayStreams[focusedIndex];
@@ -376,6 +448,16 @@ export function LiveStreamsClient() {
                 </>
               );
             })()}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <label className="text-sm text-text-muted">Host PiP (YouTube URL):</label>
+            <input
+              type="url"
+              value={pipHostUrl}
+              onChange={(e) => setPipHostUrl(e.target.value)}
+              placeholder="Optional host/webcam stream"
+              className="flex-1 min-w-[200px] px-3 py-1 rounded bg-panel border border-border text-text-primary text-sm"
+            />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {displayStreams.slice(0, 4).map((stream, i) => {

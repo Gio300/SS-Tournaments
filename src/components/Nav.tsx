@@ -2,25 +2,44 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Menu, X, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
-const links = [
+const primaryLinks = [
   { href: '/', label: 'Home' },
-  { href: '/tournaments/', label: 'Tournaments' },
   { href: '/boards/', label: 'Clans' },
   { href: '/live/', label: 'Live' },
   { href: '/ask/', label: 'Rules Bot' },
+];
+
+const moreLinks = [
   { href: '/rules/', label: 'Rules' },
   { href: '/faq/', label: 'FAQ' },
   { href: '/community/', label: 'Community' },
+  { href: '/tournaments/', label: 'Tournaments' },
+  { href: '/reels/', label: 'Reels' },
+  { href: '/matches/', label: 'Matches' },
 ];
 
 export function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLLIElement>(null);
   const { user, profile } = useAuth();
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const isMoreActive = moreLinks.some(
+    (l) => pathname === l.href || (l.href !== '/' && pathname?.startsWith(l.href))
+  );
 
   return (
     <header className="sticky top-0 z-50 bg-panel/95 backdrop-blur border-b border-border">
@@ -43,7 +62,7 @@ export function Nav() {
             open ? 'block' : 'hidden'
           }`}
         >
-          {links.map(({ href, label }) => {
+          {primaryLinks.map(({ href, label }) => {
             const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
             return (
               <li key={href}>
@@ -59,6 +78,37 @@ export function Nav() {
               </li>
             );
           })}
+          <li className="relative" ref={moreRef}>
+            <button
+              type="button"
+              onClick={() => setMoreOpen((o) => !o)}
+              className={`flex items-center gap-1 w-full sm:w-auto px-4 py-3 sm:py-2 sm:px-3 rounded text-sm font-medium transition ${
+                isMoreActive ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-text-primary hover:bg-white/5'
+              }`}
+            >
+              More
+              <ChevronDown size={14} className={moreOpen ? 'rotate-180' : ''} />
+            </button>
+            {moreOpen && (
+              <div className="absolute top-full left-0 mt-1 py-2 min-w-[160px] rounded-lg bg-panel border border-border shadow-lg z-50">
+                {moreLinks.map(({ href, label }) => {
+                  const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => { setMoreOpen(false); setOpen(false); }}
+                      className={`block px-4 py-2 text-sm font-medium transition ${
+                        active ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-text-primary hover:bg-white/5'
+                      }`}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </li>
           <li>
             <Link
               href={user ? '/profile/' : '/login/'}

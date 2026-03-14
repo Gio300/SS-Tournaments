@@ -1,18 +1,19 @@
 import Link from 'next/link';
 import { BookOpen, Film, Swords, Users, Radio, MessageCircle } from 'lucide-react';
 import { AdSlot } from '@/components/AdSlot';
+import { HeroBg } from '@/components/HeroBg';
 
 export default function HomePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-      <div className="hero-bg border border-border rounded-xl p-6 sm:p-8 mb-8 min-h-[180px] flex flex-col justify-center">
+      <HeroBg className="border border-border rounded-xl p-6 sm:p-8 mb-8 min-h-[180px] flex flex-col justify-center">
         <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary mb-3">
           SmashHub
         </h1>
         <p className="text-text-muted text-lg sm:text-xl">
           Tournament Rules · Reels · Matches · Clans · Live Streams
         </p>
-      </div>
+      </HeroBg>
 
       <AdSlot slotId="home-hero-below" className="mb-8" />
 

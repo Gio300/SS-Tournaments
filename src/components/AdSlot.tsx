@@ -2,19 +2,23 @@
 
 import { usePathname } from 'next/navigation';
 import { getSlotConfig } from '@/lib/adConfig';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface AdSlotProps {
   slotId: string;
   /** Optional custom content override (for your own business promos) */
   customContent?: React.ReactNode;
   className?: string;
+  /** When true, hide ads (e.g. on clan page for Clan Ultra) */
+  forceHide?: boolean;
 }
 
-export function AdSlot({ slotId, customContent, className = '' }: AdSlotProps) {
+export function AdSlot({ slotId, customContent, className = '', forceHide = false }: AdSlotProps) {
   const pathname = usePathname();
+  const { hasNoAds } = useSubscription();
   const config = getSlotConfig(slotId, pathname ?? undefined);
 
-  if (!config) return null;
+  if (!config || forceHide || hasNoAds) return null;
 
   // Custom slot: render provided content or placeholder for your businesses
   if (config.type === 'custom') {

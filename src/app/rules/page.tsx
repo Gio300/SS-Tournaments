@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { BookOpen, MessageCircle, Users, AlertTriangle } from 'lucide-react';
 import { AdSlot } from '@/components/AdSlot';
+import { HeroBg } from '@/components/HeroBg';
 
 export default function RulesHubPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-      <div className="hero-bg border border-border rounded-xl p-6 sm:p-8 mb-6 min-h-[200px] flex flex-col justify-center">
+      <HeroBg className="border border-border rounded-xl p-6 sm:p-8 mb-6 min-h-[200px] flex flex-col justify-center">
         <p className="text-accent font-display font-bold text-sm uppercase tracking-wider mb-2">
           Official
         </p>
@@ -15,7 +16,7 @@ export default function RulesHubPage() {
         <p className="text-text-muted text-lg sm:text-xl">
           Official Rules · Restrictions · Clarifications
         </p>
-      </div>
+      </HeroBg>
 
       <AdSlot slotId="rules-hero-below" />
 

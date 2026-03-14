@@ -43,7 +43,7 @@ button:focus-visible {
       rgba(11, 14, 20, 0.85) 40%,
       rgba(11, 14, 20, 0.9) 100%
     ),
-    url('/bg-pattern.png');
+    url('/bg-pattern.png.svg');
   background-size: cover;
   background-position: center;
   background-repeat: repeat;
@@ -73,7 +73,7 @@ button:focus-visible {
       rgba(20, 24, 36, 0.88) 50%,
       rgba(11, 14, 20, 0.92) 100%
     ),
-    url('/hero.jpg');
+    url('/hero.jpg.svg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -8,6 +8,7 @@ import { AuthGuard } from '@/components/AuthGuard'
 
 function CreateServerContent() {
   const router = useRouter()
+  const { user } = useAuth()
   const [name, setName] = useState('')
   const [clanTag, setClanTag] = useState('')
   const [loading, setLoading] = useState(false)
@@ -20,10 +21,16 @@ function CreateServerContent() {
       setError('Enter a clan name')
       return
     }
+    if (!user) return
     setLoading(true)
     const { data: server, error: serverErr } = await supabase
       .from('servers')
-      .insert({ name: name.trim(), clan_tag: clanTag.trim() || null })
+      .insert({
+        name: name.trim(),
+        clan_tag: clanTag.trim() || null,
+        owner_id: user.id,
+        join_mode: 'open',
+      })
       .select('id')
       .single()
     if (serverErr) {
@@ -31,6 +38,7 @@ function CreateServerContent() {
       setLoading(false)
       return
     }
+    await supabase.from('server_members').insert({ server_id: server.id, user_id: user.id, role: 'owner' })
     await supabase.from('channels').insert({ server_id: server.id, name: 'general', type: 'text' })
     router.push(`/boards/${server.id}/`)
     setLoading(false)

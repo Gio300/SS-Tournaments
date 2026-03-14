@@ -1,17 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/hooks/useAuth'
+import { ClanProfileView } from '@/components/ClanProfileView'
 import type { Server, Channel } from '@/types/database'
 
 export function BoardServerClient() {
   const params = useParams()
-  const router = useRouter()
   const serverId = params.serverId as string
+  const { user } = useAuth()
   const [server, setServer] = useState<Server | null>(null)
   const [channels, setChannels] = useState<Channel[]>([])
+  const [isMember, setIsMember] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -25,14 +28,14 @@ export function BoardServerClient() {
         .eq('server_id', serverId)
         .order('name')
       setChannels(channelsData ?? [])
-      setLoading(false)
-      const first = (channelsData ?? [])[0]
-      if (first) {
-        router.replace(`/boards/${serverId}/${first.id}/`)
+      if (user) {
+        const { data: mem } = await supabase.from('server_members').select('id').eq('server_id', serverId).eq('user_id', user.id).single()
+        setIsMember(!!mem)
       }
+      setLoading(false)
     }
     fetch()
-  }, [serverId, router])
+  }, [serverId, user?.id])
 
   if (loading || !server) {
     return (
@@ -42,18 +45,10 @@ export function BoardServerClient() {
     )
   }
 
-  if (channels.length === 0) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <p className="text-text-muted">No channels in this server.</p>
-        <Link href="/boards/" className="mt-4 inline-block text-accent hover:underline">← Back to Boards</Link>
-      </div>
-    )
-  }
-
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex items-center justify-center">
-      <div className="animate-pulse text-accent">Redirecting...</div>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <Link href="/boards/" className="inline-block mb-4 text-text-muted hover:text-accent">← Back to Clans</Link>
+      <ClanProfileView server={server} channels={channels} serverId={serverId} isMember={isMember} />
     </div>
   )
 }

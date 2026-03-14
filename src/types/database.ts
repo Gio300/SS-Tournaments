@@ -79,6 +79,41 @@ export interface Server {
   name: string
   clan_tag: string | null
   icon_url: string | null
+  join_mode?: 'open' | 'apply' | 'invite'
+  criteria?: Record<string, unknown> | null
+  owner_id?: string | null
+  ultra_tier_expires_at?: string | null
+  created_at: string
+}
+
+export interface Subscription {
+  id: string
+  user_id: string
+  tier: 'pro' | 'elite'
+  stripe_subscription_id: string | null
+  stripe_customer_id: string | null
+  status: 'active' | 'canceled' | 'past_due'
+  current_period_end: string | null
+  created_at: string
+}
+
+export interface ClanSubscription {
+  id: string
+  server_id: string
+  stripe_subscription_id: string | null
+  status: 'active' | 'canceled' | 'past_due'
+  current_period_end: string | null
+  created_at: string
+}
+
+export interface ServerApplication {
+  id: string
+  server_id: string
+  user_id: string
+  status: 'pending' | 'approved' | 'rejected'
+  message: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
   created_at: string
 }
 
