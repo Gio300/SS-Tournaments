@@ -1,7 +1,7 @@
 {
   "name": "SmashHub",
   "short_name": "SmashHub",
-  "description": "Tournament rules, reels, matches, clans, and live streams",
+  "description": "Tournaments, reels, matches, clans, and live streams",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0B0E14",

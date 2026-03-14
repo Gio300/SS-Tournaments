@@ -17,7 +17,7 @@ const bgImageUrl = basePath
 
 export const metadata: Metadata = {
   title: 'SmashHub',
-  description: 'SmashHub – Tournament rules, reels, matches, clans, and live streams. Single source of truth for competitive play.',
+  description: 'SmashHub – Tournaments, reels, matches, clans, and live streams. Create, join, and compete.',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes',
   icons: [{ url: basePath ? `${basePath}/favicon.svg` : '/favicon.svg', sizes: 'any', type: 'image/svg+xml' }],
 };

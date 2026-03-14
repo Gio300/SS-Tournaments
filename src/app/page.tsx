@@ -19,15 +19,15 @@ export default function HomePage() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <Link
-          href="/rules/"
+          href="/tournaments/"
           className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
         >
           <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
             <BookOpen className="text-accent" size={24} />
           </div>
           <div>
-            <h2 className="font-semibold text-text-primary mb-1">Tournament Rules</h2>
-            <p className="text-text-muted text-sm">Official rules, FAQ, Community</p>
+            <h2 className="font-semibold text-text-primary mb-1">Tournaments</h2>
+            <p className="text-text-muted text-sm">Create, join, browse tournaments</p>
           </div>
         </Link>
 
@@ -53,7 +53,7 @@ export default function HomePage() {
           </div>
           <div>
             <h2 className="font-semibold text-text-primary mb-1">Matches</h2>
-            <p className="text-text-muted text-sm">View and manage tournament matches</p>
+            <p className="text-text-muted text-sm">View and manage matches</p>
           </div>
         </Link>
 
@@ -125,10 +125,10 @@ export default function HomePage() {
           Sign in
         </Link>
         <Link
-          href="/rules/"
+          href="/tournaments/"
           className="flex items-center justify-center gap-2 bg-panel border border-border hover:border-accent text-text-primary font-semibold py-3 px-6 rounded-lg transition"
         >
-          Tournament Rules
+          Tournaments
         </Link>
       </div>
 

@@ -7,12 +7,12 @@ export default function TournamentsPage() {
         Active Tournaments
       </h1>
       <p className="text-text-muted mb-8">
-        Browse and join tournaments. Create your own from your profile.
+        Create a tournament, join a tournament, or browse active events.
       </p>
       <div className="rounded-xl border border-border bg-panel p-8 text-center">
         <p className="text-text-muted mb-4">No tournaments yet.</p>
-        <Link href="/profile/" className="text-accent hover:underline">
-          Create one from your profile
+        <Link href="/profile/" className="text-accent hover:underline font-medium">
+          Create a tournament
         </Link>
       </div>
     </div>
