@@ -30,15 +30,15 @@ function CreateReelContent() {
     supabase.from('user_youtube_links').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).then(({ data }) => setSavedLinks(data ?? []))
   }, [user?.id])
 
-  function addYoutubeClip(url?: string) {
+  function addYoutubeClip(url?: string, startSec?: number, endSec?: number) {
     const urlToUse = url ?? youtubeUrl
     const videoId = extractYouTubeId(urlToUse)
     if (!videoId) {
       setError('Invalid YouTube URL')
       return
     }
-    const start = parseInt(youtubeStart, 10) || 0
-    const end = parseInt(youtubeEnd, 10) || 0
+    const start = startSec ?? parseInt(youtubeStart, 10) || 0
+    const end = endSec ?? parseInt(youtubeEnd, 10) || 0
     if (end > 0 && end <= start) {
       setError('End time must be after start time')
       return
@@ -49,6 +49,11 @@ function CreateReelContent() {
     setYoutubeStart('')
     setYoutubeEnd('')
     setError('')
+  }
+
+  function autoAddAllSaved() {
+    setError('')
+    savedLinks.forEach((link) => addYoutubeClip(link.url, 0, 0))
   }
 
   function addFileClip(files: FileList | null) {
@@ -179,13 +184,22 @@ function CreateReelContent() {
 
         {savedLinks.length > 0 && (
           <div>
-            <label className="block text-sm text-text-muted mb-2">From my saved YouTube links (set start/end below, then click Add)</label>
+            <label className="block text-sm text-text-muted mb-2">From my saved YouTube links</label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              <button
+                type="button"
+                onClick={autoAddAllSaved}
+                className="px-4 py-2 rounded-lg border border-accent text-accent text-sm font-medium hover:bg-accent/10"
+              >
+                Auto-add all saved ({savedLinks.length})
+              </button>
+            </div>
             <div className="space-y-2">
               {savedLinks.map((link) => (
                 <div key={link.id} className="flex items-center gap-2 flex-wrap">
                   <span className="truncate text-sm text-text-primary flex-1 min-w-0">{link.url}</span>
-                  <button type="button" onClick={() => addYoutubeClip(link.url)} className="px-3 py-1 rounded border border-accent text-accent text-sm hover:bg-accent/10">
-                    Add
+                  <button type="button" onClick={() => addYoutubeClip(link.url)} className="px-3 py-1 rounded border border-border text-text-muted text-sm hover:bg-panel hover:text-text-primary">
+                    Add one
                   </button>
                 </div>
               ))}
