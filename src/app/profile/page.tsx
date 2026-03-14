@@ -6,16 +6,25 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { AuthGuard } from '@/components/AuthGuard'
-import type { Reel, UserYoutubeLink } from '@/types/database'
+import { PostComposer } from '@/components/PostComposer'
+import { PostCard } from '@/components/PostCard'
+import type { Reel, UserYoutubeLink, Post, PostAttachment, PostPoll, PostPollOption } from '@/types/database'
 
 type ReelWithProfile = Reel & { profiles?: { username: string } }
+type PostWithExtras = Post & {
+  profiles?: { username: string; avatar_url: string | null }
+  post_attachments?: (PostAttachment & { reels?: { id: string; title: string; thumbnail: string | null } })[]
+  post_polls?: (PostPoll & { post_poll_options?: (PostPollOption & { vote_count?: number; user_voted?: boolean })[] })[]
+}
+type FeedItem = { type: 'post'; data: PostWithExtras } | { type: 'reel'; data: ReelWithProfile }
 
 function ProfileContent() {
   const { user, profile, refreshProfile } = useAuth()
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [wallMode, setWallMode] = useState<'my' | 'feed'>('feed')
-  const [wallReels, setWallReels] = useState<ReelWithProfile[]>([])
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([])
+  const [refreshKey, setRefreshKey] = useState(0)
   const [youtubeLinks, setYoutubeLinks] = useState<UserYoutubeLink[]>([])
   const [newYoutubeUrl, setNewYoutubeUrl] = useState('')
   const [addingLink, setAddingLink] = useState(false)
@@ -47,30 +56,77 @@ function ProfileContent() {
     if (!user) return
     const uid = user.id
     async function fetchWall() {
-      if (wallMode === 'my') {
-        const { data } = await supabase
-          .from('reels')
-          .select('*, profiles(username)')
-          .eq('user_id', uid)
-          .order('created_at', { ascending: false })
-        setWallReels(data ?? [])
-      } else {
-        const { data: follows } = await supabase
-          .from('follows')
-          .select('following_id')
-          .eq('follower_id', uid)
-        const followingIds = (follows ?? []).map((f) => f.following_id)
-        const ids = [uid, ...followingIds]
-        const { data } = await supabase
-          .from('reels')
-          .select('*, profiles(username)')
-          .in('user_id', ids)
-          .order('created_at', { ascending: false })
-        setWallReels(data ?? [])
+      const ids = wallMode === 'my' ? [uid] : await (async () => {
+        const { data: follows } = await supabase.from('follows').select('following_id').eq('follower_id', uid)
+        return [uid, ...(follows ?? []).map((f) => f.following_id)]
+      })()
+
+      const [reelsRes, postsRes] = await Promise.all([
+        supabase.from('reels').select('*, profiles(username)').in('user_id', ids).order('created_at', { ascending: false }),
+        supabase.from('posts').select(`
+          *,
+          profiles(username, avatar_url),
+          post_attachments(*),
+          post_polls(
+            *,
+            post_poll_options(*)
+          )
+        `).in('user_id', ids).order('created_at', { ascending: false })
+      ])
+
+      const reels = (reelsRes.data ?? []) as ReelWithProfile[]
+      const posts = (postsRes.data ?? []) as PostWithExtras[]
+
+      const reelIds = new Set<string>()
+      for (const p of posts) {
+        for (const a of p.post_attachments ?? []) {
+          if (a.type === 'reel') reelIds.add(a.url_or_id)
+        }
       }
+      let reelsMap: Record<string, { id: string; title: string; thumbnail: string | null }> = {}
+      if (reelIds.size > 0) {
+        const { data: reelData } = await supabase.from('reels').select('id, title, thumbnail').in('id', Array.from(reelIds))
+        for (const r of reelData ?? []) reelsMap[r.id] = r
+      }
+      for (const p of posts) {
+        for (const a of p.post_attachments ?? []) {
+          if (a.type === 'reel' && reelsMap[a.url_or_id]) (a as any).reels = reelsMap[a.url_or_id]
+        }
+      }
+
+      const optionIds: string[] = []
+      for (const p of posts) {
+        for (const poll of p.post_polls ?? []) {
+          for (const opt of poll.post_poll_options ?? []) optionIds.push(opt.id)
+        }
+      }
+      const voteCounts: Record<string, number> = {}
+      const userVotes: Record<string, boolean> = {}
+      if (optionIds.length > 0) {
+        const { data: votes } = await supabase.from('post_poll_votes').select('option_id, user_id').in('option_id', optionIds)
+        for (const v of votes ?? []) {
+          voteCounts[v.option_id] = (voteCounts[v.option_id] ?? 0) + 1
+          if (v.user_id === uid) userVotes[v.option_id] = true
+        }
+      }
+      for (const p of posts) {
+        for (const poll of p.post_polls ?? []) {
+          for (const opt of poll.post_poll_options ?? []) {
+            (opt as any).vote_count = voteCounts[opt.id] ?? 0
+            ;(opt as any).user_voted = userVotes[opt.id] ?? false
+          }
+        }
+      }
+
+      const items: FeedItem[] = [
+        ...reels.map((r) => ({ type: 'reel' as const, data: r })),
+        ...posts.map((p) => ({ type: 'post' as const, data: p }))
+      ]
+      items.sort((a, b) => new Date(b.data.created_at).getTime() - new Date(a.data.created_at).getTime())
+      setFeedItems(items)
     }
     fetchWall()
-  }, [user?.id, wallMode])
+  }, [user?.id, wallMode, refreshKey])
 
   async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -122,6 +178,18 @@ function ProfileContent() {
   async function handleSignOut() {
     await supabase.auth.signOut()
     router.push('/')
+  }
+
+  async function handlePollVote(optionId: string) {
+    if (!user) return
+    const { data: opt } = await supabase.from('post_poll_options').select('poll_id').eq('id', optionId).single()
+    if (opt) {
+      const { data: opts } = await supabase.from('post_poll_options').select('id').eq('poll_id', opt.poll_id)
+      const ids = (opts ?? []).map((o) => o.id)
+      await supabase.from('post_poll_votes').delete().eq('user_id', user.id).in('option_id', ids)
+    }
+    await supabase.from('post_poll_votes').insert({ option_id: optionId, user_id: user.id })
+    setRefreshKey((k) => k + 1)
   }
 
   return (
@@ -223,11 +291,13 @@ function ProfileContent() {
         {youtubeLinks.length === 0 && <p className="text-text-muted text-sm">No saved links yet.</p>}
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 flex gap-2">
         <Link href="/reels/create/" className="inline-block px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90">
           Create Highlight
         </Link>
       </div>
+
+      <PostComposer onPosted={() => setRefreshKey((k) => k + 1)} />
 
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-text-primary">Wall</h2>
@@ -254,25 +324,34 @@ function ProfileContent() {
         {wallMode === 'my' ? 'Your posts only.' : 'Your posts + activity from people you follow (including patternAft3r).'}
       </p>
       <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-        {wallReels.map((reel) => (
-          <Link
-            key={reel.id}
-            href={`/reels/${reel.id}/`}
-            className="block rounded-lg border border-border bg-panel p-4 hover:border-accent/50 transition-colors"
-          >
-            <h3 className="font-medium text-text-primary">{reel.title}</h3>
-            <p className="text-sm text-text-muted">
-              <Link href={`/profile/${reel.user_id}`} className="text-accent hover:underline">
-                {reel.profiles?.username ?? 'Unknown'}
-              </Link>
-              {' · '}{reel.clip_ids?.length ?? 0} clips
-            </p>
-          </Link>
-        ))}
+        {feedItems.map((item) =>
+          item.type === 'reel' ? (
+            <Link
+              key={`reel-${item.data.id}`}
+              href={`/reels/${item.data.id}/`}
+              className="block rounded-lg border border-border bg-panel p-4 hover:border-accent/50 transition-colors"
+            >
+              <h3 className="font-medium text-text-primary">{item.data.title}</h3>
+              <p className="text-sm text-text-muted">
+                <Link href={`/profile/${item.data.user_id}`} className="text-accent hover:underline">
+                  {item.data.profiles?.username ?? 'Unknown'}
+                </Link>
+                {' · '}{item.data.clip_ids?.length ?? 0} clips
+              </p>
+            </Link>
+          ) : (
+            <PostCard
+              key={`post-${item.data.id}`}
+              post={item.data}
+              onVote={handlePollVote}
+              currentUserId={user?.id}
+            />
+          )
+        )}
       </div>
-      {wallReels.length === 0 && (
+      {feedItems.length === 0 && (
         <p className="text-text-muted">
-          {wallMode === 'my' ? 'No posts yet. Create a highlight!' : 'No activity yet. Follow patternAft3r and others to see their posts.'}
+          {wallMode === 'my' ? 'No posts yet. Create a post or highlight!' : 'No activity yet. Follow others to see their posts.'}
         </p>
       )}
     </div>

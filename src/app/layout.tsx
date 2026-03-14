@@ -4,6 +4,7 @@ import { Inter, Orbitron } from 'next/font/google';
 import './globals.css';
 import { Nav } from '@/components/Nav';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeAwareBackground } from '@/components/ThemeAwareBackground';
 import { Footer } from '@/components/Footer';
 import { RulesBotFab } from '@/components/RulesBotFab';
 import { PwaRegister } from '@/components/PwaRegister';
@@ -11,10 +12,6 @@ import { basePath } from '@/lib/basePath';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-orbitron' });
-
-const bgImageUrl = basePath
-  ? `linear-gradient(180deg, #0B0E14 0%, rgba(11,14,20,0.85) 40%, rgba(11,14,20,0.9) 100%), url('${basePath}/bg-pattern.png.svg')`
-  : undefined;
 
 export const metadata: Metadata = {
   title: 'SmashHub',
@@ -41,11 +38,7 @@ export default function RootLayout({
       )}
       <body className="font-sans antialiased min-h-screen flex flex-col relative">
         <ThemeProvider>
-        <div
-          className="fixed inset-0 -z-10 bg-app-background"
-          style={bgImageUrl ? { backgroundImage: bgImageUrl } : undefined}
-            aria-hidden
-          />
+          <ThemeAwareBackground />
           <PwaRegister />
           <Nav />
           <main className="flex-1 relative z-0">{children}</main>

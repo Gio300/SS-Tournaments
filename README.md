@@ -36,8 +36,9 @@ To enable the board and StrikerClips (reels, matches, boards, auth):
 1. Create a project at [supabase.com](https://supabase.com).
 2. In the SQL Editor, run `supabase/schema.sql` (community board).
 3. Run `supabase/strikerclips_schema.sql` (profiles, clips, reels, matches, servers, channels, messages, storage).
-4. Enable Auth providers (Email, Google, GitHub) in Supabase Dashboard.
-5. Add the project URL and anon key to `.env.local`.
+4. Run `supabase/posts_schema.sql` (posts, polls, post-images storage).
+5. Enable Auth providers (Email, Google, GitHub) in Supabase Dashboard.
+6. Add the project URL and anon key to `.env.local`.
 
 Without Supabase, the rest of the site (Rules, FAQ, Rules Bot) works; the Community page will show a loading error for the feed.
 

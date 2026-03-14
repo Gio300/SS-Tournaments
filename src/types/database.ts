@@ -133,3 +133,43 @@ export interface Message {
   clip_id: string | null
   created_at: string
 }
+
+export interface Post {
+  id: string
+  user_id: string
+  body: string
+  created_at: string
+  updated_at: string
+}
+
+export interface PostAttachment {
+  id: string
+  post_id: string
+  type: 'image' | 'reel'
+  url_or_id: string
+  sort_order: number
+  created_at: string
+}
+
+export interface PostPoll {
+  id: string
+  post_id: string
+  question: string
+  ends_at: string | null
+  created_at: string
+}
+
+export interface PostPollOption {
+  id: string
+  poll_id: string
+  label: string
+  sort_order: number
+  created_at: string
+}
+
+export interface PostPollVote {
+  id: string
+  option_id: string
+  user_id: string
+  created_at: string
+}

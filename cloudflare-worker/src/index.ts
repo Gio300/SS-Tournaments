@@ -13,6 +13,8 @@ interface RequestBody {
   rulesContext?: string;
   videoIds?: string[];
   action?: string;
+  body?: string;
+  pollQuestion?: string;
 }
 
 const corsHeaders = {
@@ -25,6 +27,7 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const isDirector = url.pathname.endsWith('/director');
+    const isAssist = url.pathname.endsWith('/assist');
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders });
@@ -39,6 +42,10 @@ export default {
 
     if (isDirector) {
       return handleDirector(request, env);
+    }
+
+    if (isAssist) {
+      return handleAssist(request, env);
     }
 
     return handleRulesBot(request, env);
@@ -117,6 +124,78 @@ async function handleDirector(request: Request, env: Env): Promise<Response> {
     console.error('Director error:', error);
     return new Response(
       JSON.stringify({ error: 'Director failed', details: error.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  }
+}
+
+async function handleAssist(request: Request, env: Env): Promise<Response> {
+  try {
+    const body: RequestBody = await request.json();
+    const { body: userText, action, pollQuestion } = body;
+
+    if (!userText && !pollQuestion) {
+      return new Response(
+        JSON.stringify({ error: 'Missing body or pollQuestion' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    const actions: Record<string, string> = {
+      rewrite: 'Rewrite this text to be clearer and fix any grammar. Keep it concise. Return only the rewritten text. Text:',
+      shorten: 'Shorten this text into a brief caption (1-2 sentences). Return only the shortened text. Text:',
+      expand: 'Expand this text with more detail and context. Return only the expanded text. Text:',
+      suggest_caption: 'Suggest a short, engaging caption for a social post. Return only the caption. Context:',
+      suggest_poll_options: 'Given this poll question, suggest 2-4 options as a JSON array of strings. Return only the JSON array. Question:',
+    };
+
+    const actionPrompt = actions[action || 'rewrite'] || actions.rewrite;
+    const inputText = pollQuestion ? `Poll question: ${pollQuestion}` : userText;
+    const prompt = `${actionPrompt}\n\n${inputText}`;
+
+    let aiResponse;
+    try {
+      aiResponse = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 500,
+        temperature: 0.4,
+      });
+    } catch (e) {
+      aiResponse = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+        prompt,
+        max_tokens: 500,
+        temperature: 0.4,
+      });
+    }
+
+    let answer = '';
+    if (typeof aiResponse === 'string') answer = aiResponse;
+    else if (aiResponse?.response) {
+      const r = aiResponse.response;
+      answer = typeof r === 'string' ? r : r?.content ?? (Array.isArray(r) ? r[0]?.content ?? '' : '');
+    } else if (aiResponse?.text) answer = aiResponse.text;
+
+    answer = answer.trim();
+    if (action === 'suggest_poll_options' && answer) {
+      const match = answer.match(/\[[\s\S]*?\]/);
+      if (match) {
+        try {
+          const arr = JSON.parse(match[0]);
+          if (Array.isArray(arr)) {
+            answer = arr.map((s: string) => String(s).trim()).filter(Boolean).join('\n');
+          }
+        } catch (_) {}
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ text: answer }),
+      { headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  } catch (error: any) {
+    console.error('Assist error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Assist failed', details: error?.message }),
       { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   }
