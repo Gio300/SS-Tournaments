@@ -30,7 +30,7 @@ export default function AskPage() {
       console.error('Error getting bot reply:', error);
       setMessages((m) => [...m, {
         role: 'assistant',
-        text: 'Sorry, I encountered an error. Please try again or check the Rules and FAQ pages.',
+        text: 'Sorry, I encountered an error. Try rephrasing or check Rules and FAQ for SML rules.',
       }]);
     } finally {
       setLoading(false);
@@ -40,26 +40,23 @@ export default function AskPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
       <h1 className="font-display text-2xl sm:text-3xl font-bold text-text-primary mb-2">
-        Rules Bot
+        Chatbot
       </h1>
       <p className="text-text-muted mb-6 flex items-center gap-2 flex-wrap">
-        Have questions? Ask the Rules Bot. Answers are based only on official tournament rules.
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-accent/20 text-accent border border-accent/40">
-          AI-Powered
-        </span>
+        Need help? Ask about profiles, reels, auto-add, tiers, clans, tournaments, live streams, or SML rules.
       </p>
 
       <div className="bg-panel border border-border rounded-xl flex flex-col overflow-hidden min-h-[60vh] sm:min-h-[400px]">
         <div className="px-4 py-3 border-b border-border bg-panel/80">
           <p className="text-sm font-medium text-text-primary">
-            Have questions? Ask the Rules Bot.
+            How does SmashHub work? Ask anything about the platform or tournament rules.
           </p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[50vh] sm:min-h-[320px]">
           {messages.length === 0 && (
             <p className="text-text-muted text-sm">
-              Type a question (e.g. &quot;Can two people use the same tool?&quot; or &quot;Is Rebirth allowed on Base?&quot;).
+              Try: &quot;What is auto-add?&quot; &quot;How do I create a profile?&quot; &quot;What are tiers?&quot; &quot;How do clans work?&quot; or SML rules questions.
             </p>
           )}
           {messages.map((msg, i) => (
@@ -108,7 +105,7 @@ export default function AskPage() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about a rule..."
+              placeholder="Ask about profiles, reels, clans, tiers..."
               className="flex-1 bg-bg border border-border rounded-lg px-4 py-2.5 text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent"
               aria-label="Question"
             />

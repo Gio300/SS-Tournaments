@@ -33,7 +33,7 @@ export default function RulesHubPage() {
           className="flex items-center justify-center gap-2 bg-panel border border-border hover:border-accent text-text-primary font-semibold py-3 px-6 rounded-lg transition"
         >
           <MessageCircle size={20} />
-          Ask the Rules Bot
+          Need help?
         </Link>
         <Link
           href="/community/"

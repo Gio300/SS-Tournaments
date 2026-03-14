@@ -10,7 +10,7 @@ const primaryLinks = [
   { href: '/', label: 'Home' },
   { href: '/boards/', label: 'Clans' },
   { href: '/live/', label: 'Live' },
-  { href: '/ask/', label: 'Rules Bot' },
+  { href: '/profile/', label: 'Profile' },
 ];
 
 const moreLinks = [
@@ -20,6 +20,7 @@ const moreLinks = [
   { href: '/tournaments/', label: 'Tournaments' },
   { href: '/reels/', label: 'Reels' },
   { href: '/matches/', label: 'Matches' },
+  { href: '/ask/', label: 'Chatbot' },
 ];
 
 export function Nav() {

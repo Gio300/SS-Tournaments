@@ -1,6 +1,7 @@
 import { getAllRuleTexts } from '@/data/rules';
 import { FAQ_ENTRIES } from '@/data/rules';
 import { getRulesContext } from '@/data/rulesContext';
+import { getHelpReply } from '@/data/helpTopics';
 
 export interface BotMessage {
   role: 'user' | 'assistant';
@@ -104,11 +105,15 @@ function scoreRule(keywords: string[], section: string, text: string): number {
 // Fallback keyword-based matching (used when AI is unavailable)
 export function getBotReply(userMessage: string): string {
   const trimmed = userMessage.trim();
-  if (!trimmed) return 'Please ask a question about the tournament rules.';
+  if (!trimmed) return 'Ask about SmashHub: profiles, reels, auto-add, tiers, clans, tournaments, live streams, or SML rules.';
+
+  // Try platform help first (profiles, reels, tiers, clans, auto, etc.)
+  const helpAnswer = getHelpReply(trimmed);
+  if (helpAnswer) return helpAnswer;
 
   const keywords = tokenize(trimmed);
 
-  // Check FAQ first for close match
+  // Check FAQ first for close match (SML/tournament rules)
   for (const faq of faqLower) {
     const matchCount = keywords.filter((k) => faq.q.includes(k)).length;
     if (matchCount >= Math.min(2, keywords.length)) {
@@ -127,7 +132,7 @@ export function getBotReply(userMessage: string): string {
     .slice(0, 5);
 
   if (scored.length === 0) {
-    return "I couldn't find a specific rule matching that. Please rephrase or check the Rules and FAQ pages. **This scenario requires staff confirmation.**";
+    return "I couldn't find a specific SML rule for that. Try asking about **profiles**, **reels**, **auto-add**, **tiers**, **clans**, or **tournaments** for platform help. For rules, check the Rules and FAQ pages. **This scenario may require staff confirmation.**";
   }
 
   const lines = ['**Relevant rules:**\n'];
@@ -145,7 +150,11 @@ export function getBotReply(userMessage: string): string {
 // AI-powered bot reply using Cloudflare Workers AI
 export async function getAIBotReply(userMessage: string): Promise<string> {
   const trimmed = userMessage.trim();
-  if (!trimmed) return 'Please ask a question about the tournament rules.';
+  if (!trimmed) return 'Ask about SmashHub: profiles, reels, auto-add, tiers, clans, tournaments, live streams, or SML rules.';
+
+  // Try platform help first (no AI needed for these)
+  const helpAnswer = getHelpReply(trimmed);
+  if (helpAnswer) return helpAnswer;
 
   const workerUrl = process.env.NEXT_PUBLIC_CF_WORKER_URL;
   

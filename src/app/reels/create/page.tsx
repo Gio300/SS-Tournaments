@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { useFFmpeg } from '@/hooks/useFFmpeg'
@@ -182,30 +183,37 @@ function CreateReelContent() {
           />
         </div>
 
-        {savedLinks.length > 0 && (
-          <div>
-            <label className="block text-sm text-text-muted mb-2">From my saved YouTube links</label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              <button
-                type="button"
-                onClick={autoAddAllSaved}
-                className="px-4 py-2 rounded-lg border border-accent text-accent text-sm font-medium hover:bg-accent/10"
-              >
-                Auto-add all saved ({savedLinks.length})
-              </button>
-            </div>
-            <div className="space-y-2">
-              {savedLinks.map((link) => (
-                <div key={link.id} className="flex items-center gap-2 flex-wrap">
-                  <span className="truncate text-sm text-text-primary flex-1 min-w-0">{link.url}</span>
-                  <button type="button" onClick={() => addYoutubeClip(link.url)} className="px-3 py-1 rounded border border-border text-text-muted text-sm hover:bg-panel hover:text-text-primary">
-                    Add one
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        <div>
+          <label className="block text-sm text-text-muted mb-2">Auto-add from saved links</label>
+          {savedLinks.length > 0 ? (
+            <>
+              <div className="flex flex-wrap gap-2 mb-2">
+                <button
+                  type="button"
+                  onClick={autoAddAllSaved}
+                  className="px-4 py-2 rounded-lg border border-accent text-accent text-sm font-medium hover:bg-accent/10"
+                >
+                  Auto-add all saved ({savedLinks.length})
+                </button>
+              </div>
+              <div className="space-y-2">
+                {savedLinks.map((link) => (
+                  <div key={link.id} className="flex items-center gap-2 flex-wrap">
+                    <span className="truncate text-sm text-text-primary flex-1 min-w-0">{link.url}</span>
+                    <button type="button" onClick={() => addYoutubeClip(link.url)} className="px-3 py-1 rounded border border-border text-text-muted text-sm hover:bg-panel hover:text-text-primary">
+                      Add one
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-text-muted">
+              Save YouTube links in your{' '}
+              <Link href="/profile/" className="text-accent hover:underline">Profile</Link> to use Auto-add. One click adds all saved clips.
+            </p>
+          )}
+        </div>
 
         <div>
           <label className="block text-sm text-text-muted mb-2">Add YouTube clip (URL)</label>

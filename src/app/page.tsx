@@ -11,7 +11,7 @@ export default function HomePage() {
           SmashHub
         </h1>
         <p className="text-text-muted text-lg sm:text-xl">
-          Tournament Rules · Reels · Matches · Clans · Live Streams
+          Social platform for gaming · Reels · Clans · Live · Tournaments
         </p>
       </HeroBg>
 
@@ -27,7 +27,7 @@ export default function HomePage() {
           </div>
           <div>
             <h2 className="font-semibold text-text-primary mb-1">Tournament Rules</h2>
-            <p className="text-text-muted text-sm">Official rules, FAQ, Rules Bot, Community</p>
+            <p className="text-text-muted text-sm">Official rules, FAQ, Community</p>
           </div>
         </Link>
 
@@ -91,8 +91,8 @@ export default function HomePage() {
             <MessageCircle className="text-accent" size={24} />
           </div>
           <div>
-            <h2 className="font-semibold text-text-primary mb-1">Rules Bot</h2>
-            <p className="text-text-muted text-sm">AI-powered rule questions</p>
+            <h2 className="font-semibold text-text-primary mb-1">Chatbot</h2>
+            <p className="text-text-muted text-sm">Need help? Profiles, reels, clans, tiers</p>
           </div>
         </Link>
       </div>
