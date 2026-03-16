@@ -13,6 +13,7 @@ function CreateMatchContent() {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [liveStreamUrl, setLiveStreamUrl] = useState('')
+  const [scheduledAt, setScheduledAt] = useState('')
   const [reels, setReels] = useState<Reel[]>([])
   const [selectedReelIds, setSelectedReelIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,6 +73,15 @@ function CreateMatchContent() {
             onChange={(e) => setName(e.target.value)}
             className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
             placeholder="Weekend Finals"
+          />
+        </div>
+        <div>
+          <label className="block text-sm text-text-muted mb-1">Schedule date & time (optional)</label>
+          <input
+            type="datetime-local"
+            value={scheduledAt}
+            onChange={(e) => setScheduledAt(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
           />
         </div>
         <div>

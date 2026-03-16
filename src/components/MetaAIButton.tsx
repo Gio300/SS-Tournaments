@@ -68,6 +68,7 @@ export function MetaAIButton({
         }),
       });
       const data = await res.json();
+      if (res.status === 429) throw new Error('Rate limit reached. Try again in a few minutes.');
       if (!res.ok) throw new Error(data.error || data.details || 'Request failed');
       const text = data.text ?? '';
       if (text) {

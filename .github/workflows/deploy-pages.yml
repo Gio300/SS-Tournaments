@@ -38,6 +38,9 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_CF_WORKER_URL: ${{ secrets.NEXT_PUBLIC_CF_WORKER_URL }}
 
+      - name: SPA 404 fallback for dynamic routes (profile/[userId], etc.)
+        run: cp out/index.html out/404.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

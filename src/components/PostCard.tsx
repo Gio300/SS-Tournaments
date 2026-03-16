@@ -51,7 +51,7 @@ export function PostCard({
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <Link href={`/profile/${post.user_id}`} className="font-medium text-accent hover:underline">
+          <Link href={`/profile/${post.user_id}/`} className="font-medium text-accent hover:underline">
             {post.profiles?.username ?? 'Unknown'}
           </Link>
           <span className="text-text-muted text-sm ml-2">

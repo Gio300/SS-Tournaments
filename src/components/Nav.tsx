@@ -1,38 +1,47 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Menu, X, ChevronDown, Sun, Moon } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Menu, X, ChevronDown, Sun, Moon, LogOut } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
+import { NavSearchBar } from '@/components/NavSearchBar';
 
 const primaryLinks = [
   { href: '/', label: 'Home' },
+  { href: '/rankings/', label: 'Rankings' },
+  { href: '/matches/', label: 'Matches' },
   { href: '/boards/', label: 'Clans' },
-  { href: '/live/', label: 'Live' },
   { href: '/profile/', label: 'Profile' },
+  { href: '/settings/', label: 'Settings' },
 ];
 
 const moreLinks = [
-  { href: '/rankings/', label: 'Rankings' },
-  { href: '/stat-check/', label: 'Stat Check' },
-  { href: '/rules/', label: 'Rules' },
-  { href: '/faq/', label: 'FAQ' },
-  { href: '/community/', label: 'Community' },
+  { href: '/live/', label: 'Live' },
   { href: '/tournaments/', label: 'Tournaments' },
   { href: '/reels/', label: 'Reels' },
-  { href: '/matches/', label: 'Matches' },
-  { href: '/ask/', label: 'Chatbot' },
+  { href: '/stat-check/', label: 'Stat Check' },
+  { href: '/submit-result/', label: 'Submit Result' },
+  { href: '/community/', label: 'Community' },
+  { href: '/search/', label: 'Search' },
 ];
 
 export function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLLIElement>(null);
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    setOpen(false);
+    router.push('/');
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -49,10 +58,14 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 bg-panel/95 backdrop-blur border-b border-border">
       <nav className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
-        <Link href="/" className="font-display font-bold text-lg transition flex items-center gap-0.5">
+        <Link href="/" className="font-display font-bold text-lg transition flex items-center gap-0.5 shrink-0">
           <span className="text-red-600 hover:text-red-700">Smash</span>
           <span className="text-green-600 hover:text-green-700">Hub</span>
         </Link>
+
+        <div className="hidden sm:block flex-1 max-w-md">
+          <NavSearchBar />
+        </div>
 
         <div className="flex items-center gap-1">
           <button
@@ -125,7 +138,18 @@ export function Nav() {
               </div>
             )}
           </li>
-          {!user && (
+          {user ? (
+            <li>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 w-full sm:w-auto px-4 py-3 sm:py-2 sm:px-3 rounded text-sm font-medium text-text-muted hover:text-text-primary hover:bg-white/5 transition"
+              >
+                <LogOut size={16} />
+                Log out
+              </button>
+            </li>
+          ) : (
             <li>
               <Link
                 href="/login/"

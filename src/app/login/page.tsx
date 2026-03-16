@@ -25,7 +25,7 @@ export default function LoginPage() {
     router.push('/')
   }
 
-  async function handleOAuth(provider: 'google' | 'github') {
+  async function handleOAuth(provider: 'google' | 'github' | 'facebook') {
     setError('')
     const { error } = await supabase.auth.signInWithOAuth({ provider })
     if (error) setError(error.message)
@@ -81,6 +81,13 @@ export default function LoginPage() {
             className="flex-1 py-2 rounded-lg border border-border hover:border-accent/50 text-text-muted hover:text-accent transition-colors"
           >
             GitHub
+          </button>
+          <button
+            type="button"
+            onClick={() => handleOAuth('facebook')}
+            className="flex-1 py-2 rounded-lg border border-border hover:border-accent/50 text-text-muted hover:text-accent transition-colors"
+          >
+            Facebook
           </button>
         </div>
         <p className="mt-6 text-center text-sm text-text-muted">

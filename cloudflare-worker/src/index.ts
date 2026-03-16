@@ -223,16 +223,20 @@ async function handleScreenshotAnalyze(request: Request, env: Env): Promise<Resp
     const imgUrl = imageBase64.startsWith('data:') ? imageBase64 : `data:image/png;base64,${imageBase64}`;
     const mt = matchType || 'quick_match';
 
-    const prompt = `This is a Shinobi Strikers (Naruto game) end-of-match screenshot. Match type: ${mt}.
+    const prompt = `This is a Shinobi Strikers (Naruto to Boruto: Shinobi Striker) end-of-match screen. One player row is highlighted in light blue - that is the UPLOADER (the person taking the screenshot). The top section is "Victory" (winners), bottom is "Defeat" (losers).
 
-Extract the following and reply with ONLY a JSON object (no other text):
-- winnerName: the winning player's display name (or team name if team match)
-- loserNames: array of losing player names (or empty array for 1v1 survival)
-- redTeam: array of player names on red team (if team match, else null)
-- whiteTeam: array of player names on white team (if team match, else null)
-- scores: object with red and white scores if visible, e.g. {"red": 3, "white": 1}, else null
+Extract and reply with ONLY a JSON object (no other text):
+- uploaderName: the in-game name of the player whose row is highlighted in light blue - that is the uploader
+- victoryTeam: array of player names in the Victory section
+- defeatTeam: array of player names in the Defeat section
+- players: array of objects, one per row: { "name": "in-game name", "points": number from Points column, "team": "victory" or "defeat", "isUploader": true only for the blue-highlighted row }
+- playTimeSec: match duration in seconds as integer (e.g. "Play Time 05:23" = 323)
+- resultsRemainingSec: countdown number as integer (e.g. "Results will close in: 17" = 17)
+- matchMode: "barrier_battle" or "quick_match" or "survival" or "red_white" or "ninja_world_league" or "tournament" based on what the screen shows
+- winnerName: first player in Victory (for legacy)
+- loserNames: array of Defeat (for legacy)
 
-Example: {"winnerName":"Player1","loserNames":["Player2"],"redTeam":null,"whiteTeam":null,"scores":null}`;
+Example: {"uploaderName":"KmH_PatternAft3r","victoryTeam":["IKMHIFINISH_HIM!","KmH_PatternAft3r"],"defeatTeam":["Maruki","SHINOBI"],"players":[{"name":"KmH_PatternAft3r","points":976,"team":"victory","isUploader":true}],"playTimeSec":323,"resultsRemainingSec":17,"matchMode":"barrier_battle","winnerName":"IKMHIFINISH_HIM!","loserNames":["Maruki"]}`;
 
     const content: Array<{ type: string; text?: string; image_url?: { url: string } }> = [
       { type: 'text', text: prompt },
@@ -264,6 +268,13 @@ Example: {"winnerName":"Player1","loserNames":["Player2"],"redTeam":null,"whiteT
 
     return new Response(
       JSON.stringify({
+        uploaderName: null,
+        victoryTeam: [],
+        defeatTeam: [],
+        players: [],
+        playTimeSec: null,
+        resultsRemainingSec: null,
+        matchMode: mt,
         winnerName: null,
         loserNames: [],
         redTeam: null,

@@ -45,4 +45,4 @@
 
 - **"AI binding not found"**: Enable Workers AI in Cloudflare dashboard
 - **CORS errors**: Worker includes CORS headers; check URL is correct
-- **Rate limits**: Free tier is generous; if exceeded, bot falls back to keyword matching
+- **Rate limits**: Free tier includes 10,000 Neurons/day. If you see "Rate limit reached", wait a few minutes. The app shows a user-friendly message and falls back to keyword matching where applicable.

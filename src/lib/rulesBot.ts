@@ -177,6 +177,9 @@ export async function getAIBotReply(userMessage: string): Promise<string> {
       }),
     });
 
+    if (response.status === 429) {
+      return `**Rate limit reached.** Cloudflare AI free tier has daily limits. Try again in a few minutes, or ask a simpler question.\n\n**Fallback:**\n\n${getBotReply(userMessage)}`;
+    }
     if (!response.ok) {
       throw new Error(`Worker responded with status ${response.status}`);
     }

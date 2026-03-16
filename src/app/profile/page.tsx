@@ -31,11 +31,13 @@ function ProfileContent() {
   const [editing, setEditing] = useState(false)
   const [username, setUsername] = useState('')
   const [bio, setBio] = useState('')
+  const [gameTag, setGameTag] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   useEffect(() => {
     setUsername(profile?.username ?? '')
     setBio(profile?.bio ?? '')
+    setGameTag(profile?.game_tag ?? '')
   }, [profile])
 
   useEffect(() => {
@@ -227,6 +229,13 @@ function ProfileContent() {
                   className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary mb-2"
                   placeholder="Username"
                 />
+                <input
+                  value={gameTag}
+                  onChange={(e) => setGameTag(e.target.value)}
+                  className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary mb-2"
+                  placeholder="In-game name (PSN / game tag)"
+                />
+                <p className="text-xs text-text-muted mb-2">Required for submitting match screenshots. Must match the name highlighted in blue on your screenshot.</p>
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
@@ -246,6 +255,7 @@ function ProfileContent() {
             ) : (
               <>
                 <h1 className="font-display text-xl font-bold text-text-primary">{username}</h1>
+                {gameTag && <p className="text-text-muted text-sm mt-1">In-game: {gameTag}</p>}
                 {bio && <p className="text-text-muted mt-2">{bio}</p>}
                 <button
                   onClick={() => setEditing(true)}
@@ -333,7 +343,7 @@ function ProfileContent() {
             >
               <h3 className="font-medium text-text-primary">{item.data.title}</h3>
               <p className="text-sm text-text-muted">
-                <Link href={`/profile/${item.data.user_id}`} className="text-accent hover:underline">
+                <Link href={`/profile/${item.data.user_id}/`} className="text-accent hover:underline">
                   {item.data.profiles?.username ?? 'Unknown'}
                 </Link>
                 {(item.data.profiles as { power_level?: number })?.power_level != null && (

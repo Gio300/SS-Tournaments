@@ -9,6 +9,7 @@ export interface Profile {
   power_level?: number
   country?: string | null
   dashboard_override?: Json | null
+  game_tag?: string | null
   created_at: string
   updated_at: string
 }
@@ -41,7 +42,20 @@ export interface Match {
   description: string | null
   reel_ids: string[]
   live_stream_url: string | null
+  scheduled_at: string | null
   created_at: string
+}
+
+export interface Tournament {
+  id: string
+  name: string
+  description: string | null
+  server_id: string | null
+  created_by: string | null
+  created_at: string
+  rules?: string | null
+  stat_check_times?: Json | null
+  tournament_days_times?: Json | null
 }
 
 export interface LiveStream {
@@ -177,12 +191,16 @@ export interface PostPollVote {
   created_at: string
 }
 
-export type MatchType = 'survival' | 'quick_match' | 'red_white' | 'ninja_world_league' | 'tournament'
+export type MatchType = 'survival' | 'quick_match' | 'red_white' | 'ninja_world_league' | 'tournament' | 'barrier_battle'
 
 export interface MatchResult {
   id: string
   uploader_id: string
   screenshot_url: string
+  screenshot_hash: string | null
+  play_time_sec: number | null
+  results_remaining_sec: number | null
+  uploader_in_game_name: string | null
   match_type: MatchType
   status: 'pending' | 'verified' | 'rejected'
   verified_at: string | null
@@ -201,12 +219,13 @@ export interface MatchResultPlayer {
 }
 
 export interface PowerRating {
-  id: string
+  id?: string
   profile_id: string
   match_type: MatchType
   rating: number
   wins: number
   losses: number
+  accumulated_points: number
   updated_at: string
 }
 

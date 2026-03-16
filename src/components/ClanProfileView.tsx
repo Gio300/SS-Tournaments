@@ -12,16 +12,22 @@ interface MemberWithProfile {
   profile?: { username: string; avatar_url?: string }
 }
 
+const CLAN_ROLES = ['owner', 'admin', 'moderator', 'member'] as const
+
 interface ClanProfileViewProps {
   server: Server
   channels: Channel[]
   serverId: string
   isMember: boolean
+  userRole?: string | null
 }
 
-export function ClanProfileView({ server, channels, serverId, isMember }: ClanProfileViewProps) {
+export function ClanProfileView({ server, channels, serverId, isMember, userRole }: ClanProfileViewProps) {
   const [members, setMembers] = useState<MemberWithProfile[]>([])
   const [reels, setReels] = useState<{ id: string; title: string; user_id: string }[]>([])
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null)
+
+  const canManageRoles = userRole === 'owner' || userRole === 'admin'
 
   useEffect(() => {
     async function fetch() {
@@ -54,6 +60,17 @@ export function ClanProfileView({ server, channels, serverId, isMember }: ClanPr
     }
     fetch()
   }, [serverId])
+
+  async function updateMemberRole(memberId: string, newRole: string) {
+    setUpdatingRole(memberId)
+    const { error } = await supabase.from('server_members').update({ role: newRole }).eq('id', memberId)
+    setUpdatingRole(null)
+    if (!error) {
+      setMembers((prev) =>
+        prev.map((m) => (m.id === memberId ? { ...m, role: newRole } : m))
+      )
+    }
+  }
 
   const isUltra = server.ultra_tier_expires_at && new Date(server.ultra_tier_expires_at) > new Date()
 
@@ -115,9 +132,28 @@ export function ClanProfileView({ server, channels, serverId, isMember }: ClanPr
                     {m.profile?.username?.[0] ?? '?'}
                   </div>
                 )}
-                <span className="text-text-primary font-medium">@{m.profile?.username ?? 'Unknown'}</span>
-                {m.role !== 'member' && (
-                  <span className="text-xs px-2 py-0.5 rounded bg-accent/20 text-accent">{m.role}</span>
+                <span className="text-text-primary font-medium flex-1">@{m.profile?.username ?? 'Unknown'}</span>
+                {canManageRoles ? (
+                  <select
+                    value={m.role}
+                    onChange={(e) => updateMemberRole(m.id, e.target.value)}
+                    disabled={
+                      updatingRole === m.id ||
+                      m.role === 'owner' ||
+                      (userRole === 'admin' && m.role === 'owner')
+                    }
+                    className="text-xs px-2 py-1 rounded bg-background border border-border text-text-primary focus:outline-none focus:border-accent disabled:opacity-50"
+                  >
+                    {CLAN_ROLES.map((r) => (
+                      <option key={r} value={r} disabled={r === 'owner' && userRole !== 'owner'}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  m.role !== 'member' && (
+                    <span className="text-xs px-2 py-0.5 rounded bg-accent/20 text-accent">{m.role}</span>
+                  )
                 )}
               </div>
             ))}

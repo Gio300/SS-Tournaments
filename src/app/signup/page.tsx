@@ -8,6 +8,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
+  const [agreePrivacy, setAgreePrivacy] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
@@ -15,6 +16,10 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+    if (!agreePrivacy) {
+      setError('You must agree to the Privacy Policy to create an account.')
+      return
+    }
     setLoading(true)
     const { error } = await supabase.auth.signUp({
       email,
@@ -29,8 +34,12 @@ export default function SignupPage() {
     setSent(true)
   }
 
-  async function handleOAuth(provider: 'google' | 'github') {
+  async function handleOAuth(provider: 'google' | 'github' | 'facebook') {
     setError('')
+    if (!agreePrivacy) {
+      setError('You must agree to the Privacy Policy to create an account.')
+      return
+    }
     const { error } = await supabase.auth.signInWithOAuth({ provider })
     if (error) setError(error.message)
   }
@@ -87,19 +96,32 @@ export default function SignupPage() {
               minLength={6}
             />
           </div>
+          <label className="flex items-start gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={agreePrivacy}
+              onChange={(e) => setAgreePrivacy(e.target.checked)}
+              className="mt-1 rounded border-border"
+            />
+            <span className="text-sm text-text-muted">
+              I agree to the <Link href="/privacy/" className="text-accent hover:underline" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
+            </span>
+          </label>
           {error && <p className="text-accent text-sm">{error}</p>}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !agreePrivacy}
             className="w-full py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90 disabled:opacity-50"
           >
             {loading ? 'Creating...' : 'Create account'}
           </button>
         </form>
+        <p className="text-xs text-text-muted mt-2">OAuth signup also requires agreement above.</p>
         <div className="mt-4 flex gap-4">
           <button
             type="button"
             onClick={() => handleOAuth('google')}
+            disabled={!agreePrivacy}
             className="flex-1 py-2 rounded-lg border border-border hover:border-accent/50 text-text-muted hover:text-accent transition-colors"
           >
             Google
@@ -110,6 +132,13 @@ export default function SignupPage() {
             className="flex-1 py-2 rounded-lg border border-border hover:border-accent/50 text-text-muted hover:text-accent transition-colors"
           >
             GitHub
+          </button>
+          <button
+            type="button"
+            onClick={() => handleOAuth('facebook')}
+            className="flex-1 py-2 rounded-lg border border-border hover:border-accent/50 text-text-muted hover:text-accent transition-colors"
+          >
+            Facebook
           </button>
         </div>
         <p className="mt-6 text-center text-sm text-text-muted">

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpen, Film, Swords, Users, Radio, MessageCircle } from 'lucide-react';
+import { Trophy, Swords, Users, User, Settings, Film, Radio, BookOpen } from 'lucide-react';
 import { AdSlot } from '@/components/AdSlot';
 import { HeroBg } from '@/components/HeroBg';
 
@@ -11,13 +11,78 @@ export default function HomePage() {
           SmashHub
         </h1>
         <p className="text-text-muted text-lg sm:text-xl">
-          Social platform for gaming · Reels · Clans · Live · Tournaments
+          Social platform for gaming · Rankings · Matches · Clans · Tournaments
         </p>
       </HeroBg>
 
       <AdSlot slotId="home-hero-below" className="mb-8" />
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <Link
+          href="/rankings/"
+          className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
+        >
+          <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
+            <Trophy className="text-accent" size={24} />
+          </div>
+          <div>
+            <h2 className="font-semibold text-text-primary mb-1">Rankings</h2>
+            <p className="text-text-muted text-sm">User power levels, trophies, and clan leaderboards</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/matches/"
+          className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
+        >
+          <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
+            <Swords className="text-accent" size={24} />
+          </div>
+          <div>
+            <h2 className="font-semibold text-text-primary mb-1">Matches</h2>
+            <p className="text-text-muted text-sm">Live streams, played matches, and tournaments</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/boards/"
+          className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
+        >
+          <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
+            <Users className="text-accent" size={24} />
+          </div>
+          <div>
+            <h2 className="font-semibold text-text-primary mb-1">Clans</h2>
+            <p className="text-text-muted text-sm">Chat with your clan, share clips, clan rankings</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/profile/"
+          className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
+        >
+          <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
+            <User className="text-accent" size={24} />
+          </div>
+          <div>
+            <h2 className="font-semibold text-text-primary mb-1">Profile</h2>
+            <p className="text-text-muted text-sm">Your profile, feed, reels, and activity</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/settings/"
+          className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
+        >
+          <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
+            <Settings className="text-accent" size={24} />
+          </div>
+          <div>
+            <h2 className="font-semibold text-text-primary mb-1">Settings</h2>
+            <p className="text-text-muted text-sm">Theme, account, FAQ, and chatbot</p>
+          </div>
+        </Link>
+
         <Link
           href="/tournaments/"
           className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
@@ -27,7 +92,7 @@ export default function HomePage() {
           </div>
           <div>
             <h2 className="font-semibold text-text-primary mb-1">Tournaments</h2>
-            <p className="text-text-muted text-sm">Create, join, browse tournaments</p>
+            <p className="text-text-muted text-sm">Create custom tournaments with your own rules</p>
           </div>
         </Link>
 
@@ -45,32 +110,6 @@ export default function HomePage() {
         </Link>
 
         <Link
-          href="/matches/"
-          className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
-        >
-          <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
-            <Swords className="text-accent" size={24} />
-          </div>
-          <div>
-            <h2 className="font-semibold text-text-primary mb-1">Matches</h2>
-            <p className="text-text-muted text-sm">View and manage matches</p>
-          </div>
-        </Link>
-
-        <Link
-          href="/boards/"
-          className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
-        >
-          <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
-            <Users className="text-accent" size={24} />
-          </div>
-          <div>
-            <h2 className="font-semibold text-text-primary mb-1">Clans</h2>
-            <p className="text-text-muted text-sm">Chat with your clan, share clips</p>
-          </div>
-        </Link>
-
-        <Link
           href="/live/"
           className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
         >
@@ -78,21 +117,21 @@ export default function HomePage() {
             <Radio className="text-accent" size={24} />
           </div>
           <div>
-            <h2 className="font-semibold text-text-primary mb-1">Live Streams</h2>
+            <h2 className="font-semibold text-text-primary mb-1">Live</h2>
             <p className="text-text-muted text-sm">Watch and share live streams</p>
           </div>
         </Link>
 
         <Link
-          href="/ask/"
+          href="/submit-result/"
           className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
         >
           <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
-            <MessageCircle className="text-accent" size={24} />
+            <Trophy className="text-accent" size={24} />
           </div>
           <div>
-            <h2 className="font-semibold text-text-primary mb-1">Chatbot</h2>
-            <p className="text-text-muted text-sm">Need help? Profiles, reels, clans, tiers</p>
+            <h2 className="font-semibold text-text-primary mb-1">Submit Result</h2>
+            <p className="text-text-muted text-sm">Upload match screenshots to earn points</p>
           </div>
         </Link>
       </div>
@@ -101,16 +140,22 @@ export default function HomePage() {
 
       <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
         <Link
-          href="/reels/create/"
+          href="/submit-result/"
           className="flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition"
         >
-          Create Highlight
+          Submit Result
         </Link>
         <Link
-          href="/reels/"
+          href="/rankings/"
           className="flex items-center justify-center gap-2 bg-panel border border-border hover:border-accent text-text-primary font-semibold py-3 px-6 rounded-lg transition"
         >
-          Browse Reels
+          Rankings
+        </Link>
+        <Link
+          href="/reels/create/"
+          className="flex items-center justify-center gap-2 bg-panel border border-border hover:border-accent text-text-primary font-semibold py-3 px-6 rounded-lg transition"
+        >
+          Create Highlight
         </Link>
         <Link
           href="/live/"
@@ -125,10 +170,10 @@ export default function HomePage() {
           Sign in
         </Link>
         <Link
-          href="/tournaments/"
+          href="/settings/"
           className="flex items-center justify-center gap-2 bg-panel border border-border hover:border-accent text-text-primary font-semibold py-3 px-6 rounded-lg transition"
         >
-          Tournaments
+          Settings
         </Link>
       </div>
 

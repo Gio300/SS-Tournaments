@@ -12,37 +12,39 @@ import type { MatchType } from '@/types/database';
 const MATCH_TYPES: { value: MatchType; label: string }[] = [
   { value: 'survival', label: 'Survival (1v1)' },
   { value: 'quick_match', label: 'Quick Match' },
+  { value: 'barrier_battle', label: 'Barrier Battle' },
   { value: 'red_white', label: 'Red vs White' },
   { value: 'ninja_world_league', label: 'Ninja World League' },
   { value: 'tournament', label: 'Tournament' },
 ];
 
+type AiPlayer = { name: string; points: number; team: string; isUploader?: boolean };
+
+type AiResult = {
+  uploaderName?: string | null;
+  victoryTeam?: string[];
+  defeatTeam?: string[];
+  players?: AiPlayer[];
+  playTimeSec?: number | null;
+  resultsRemainingSec?: number | null;
+  matchMode?: string;
+  winnerName?: string | null;
+  loserNames?: string[];
+};
+
 function SubmitResultContent() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [matchType, setMatchType] = useState<MatchType>('quick_match');
-  const [winnerId, setWinnerId] = useState<string | null>(null);
-  const [loserIds, setLoserIds] = useState<string[]>([]);
-  const [profiles, setProfiles] = useState<{ id: string; username: string }[]>([]);
-  const [aiResult, setAiResult] = useState<{
-    winnerName?: string | null;
-    loserNames?: string[];
-    redTeam?: string[] | null;
-    whiteTeam?: string[] | null;
-    scores?: { red?: number; white?: number } | null;
-  } | null>(null);
+  const [aiResult, setAiResult] = useState<AiResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const workerUrl = process.env.NEXT_PUBLIC_CF_WORKER_URL;
-
-  useEffect(() => {
-    supabase.from('profiles').select('id, username').order('username').then(({ data }) => setProfiles(data ?? []));
-  }, []);
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -50,7 +52,21 @@ function SubmitResultContent() {
     setScreenshotFile(file);
     setScreenshotPreview(URL.createObjectURL(file));
     setAiResult(null);
+    setError('');
     e.target.value = '';
+  }
+
+  async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function gameTagMatches(tag: string | null | undefined, inGameName: string | null | undefined): boolean {
+    if (!tag?.trim() || !inGameName?.trim()) return false;
+    const t = tag.trim().toLowerCase();
+    const n = inGameName.trim().toLowerCase();
+    return n.includes(t) || t.includes(n);
   }
 
   async function handleAnalyze() {
@@ -73,21 +89,9 @@ function SubmitResultContent() {
         body: JSON.stringify({ imageBase64: base64, matchType }),
       });
       const data = await res.json();
+      if (res.status === 429) throw new Error('Rate limit reached. Try again in a few minutes.');
       if (!res.ok) throw new Error(data.error || 'Analysis failed');
       setAiResult(data);
-      if (data.winnerName) {
-        const match = profiles.find((p) =>
-          p.username.toLowerCase().includes(data.winnerName.toLowerCase())
-        );
-        if (match) setWinnerId(match.id);
-      }
-      if (data.loserNames?.length) {
-        const ids = data.loserNames
-          .map((name: string) => profiles.find((p) => p.username.toLowerCase().includes(name.toLowerCase())))
-          .filter(Boolean)
-          .map((p: { id: string }) => p.id);
-        setLoserIds(ids);
-      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'AI analysis failed');
     } finally {
@@ -97,32 +101,66 @@ function SubmitResultContent() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!user || !screenshotFile) return;
+    if (!user || !screenshotFile || !aiResult) return;
     setError('');
-    if (!winnerId) {
-      setError('Select the winner.');
+
+    const gameTag = profile?.game_tag?.trim();
+    if (!gameTag) {
+      setError('Set your in-game name in Profile first.');
       return;
     }
-    if (matchType === 'survival' && loserIds.length !== 1) {
-      setError('Survival requires exactly one loser.');
+
+    const uploaderName = aiResult.uploaderName ?? aiResult.winnerName;
+    if (!gameTagMatches(gameTag, uploaderName)) {
+      setError(`Screenshot shows "${uploaderName ?? 'unknown'}". Update your game tag to match or use your own screenshot.`);
       return;
     }
+
+    const playTimeSec = aiResult.playTimeSec ?? null;
+    const resultsRemainingSec = aiResult.resultsRemainingSec ?? null;
+
     setSubmitting(true);
     try {
+      const buf = await screenshotFile.arrayBuffer();
+      const screenshotHash = await sha256Hex(buf);
+
+      if (playTimeSec != null && resultsRemainingSec != null && screenshotHash) {
+        const { data: existing } = await supabase
+          .from('match_results')
+          .select('id')
+          .eq('play_time_sec', playTimeSec)
+          .eq('results_remaining_sec', resultsRemainingSec)
+          .eq('screenshot_hash', screenshotHash)
+          .limit(1);
+        if (existing?.length) {
+          setError('This screenshot was already submitted.');
+          setSubmitting(false);
+          return;
+        }
+      }
+
       const path = `${user.id}/${crypto.randomUUID()}_${screenshotFile.name}`;
-      const { error: upErr } = await supabase.storage.from('screenshots').upload(path, screenshotFile, {
+      const { error: upErr } = await supabase.storage.from('match-screenshots').upload(path, screenshotFile, {
         contentType: screenshotFile.type,
         upsert: false,
       });
       if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from('screenshots').getPublicUrl(path);
+      const { data: urlData } = supabase.storage.from('match-screenshots').getPublicUrl(path);
+
+      const resolvedMatchType = (aiResult.matchMode as MatchType) || matchType;
+      const validMatchTypes: MatchType[] = ['survival', 'quick_match', 'red_white', 'ninja_world_league', 'tournament', 'barrier_battle'];
+      const matchTypeFinal = validMatchTypes.includes(resolvedMatchType) ? resolvedMatchType : matchType;
 
       const { data: resultData, error: resultErr } = await supabase
         .from('match_results')
         .insert({
           uploader_id: user.id,
           screenshot_url: urlData.publicUrl,
-          match_type: matchType,
+          screenshot_hash: screenshotHash,
+          play_time_sec: playTimeSec,
+          results_remaining_sec: resultsRemainingSec,
+          uploader_in_game_name: uploaderName,
+          match_type: matchTypeFinal,
           status: 'verified',
           verified_at: new Date().toISOString(),
           verified_by: user.id,
@@ -131,70 +169,55 @@ function SubmitResultContent() {
         .single();
       if (resultErr) throw resultErr;
 
-      await supabase.from('match_result_players').insert({
-        result_id: resultData.id,
-        profile_id: winnerId,
-        role: 'winner',
-      });
-      for (const lid of loserIds) {
-        await supabase.from('match_result_players').insert({
-          result_id: resultData.id,
-          profile_id: lid,
-          role: 'loser',
-        });
+      const { data: profilesWithTag } = await supabase
+        .from('profiles')
+        .select('id, game_tag')
+        .not('game_tag', 'is', null);
+
+      const tagToProfile = new Map<string, string>();
+      for (const p of profilesWithTag ?? []) {
+        if (p.game_tag) tagToProfile.set(p.game_tag.trim().toLowerCase(), p.id);
       }
 
-      const K = 32;
-      const defaultRating = 1000;
-      const participants = [winnerId, ...loserIds];
-      const { data: existing } = await supabase
-        .from('power_ratings')
-        .select('profile_id, rating, wins, losses')
-        .eq('match_type', matchType)
-        .in('profile_id', participants);
-      const ratingsMap = new Map((existing ?? []).map((r) => [r.profile_id, r]));
-      const winnerRow = ratingsMap.get(winnerId);
-      const winnerRating = winnerRow?.rating ?? defaultRating;
-      const loserRatings = loserIds.map((id) => ratingsMap.get(id)?.rating ?? defaultRating);
-      const avgLoserRating = loserRatings.length ? loserRatings.reduce((a, b) => a + b, 0) / loserRatings.length : defaultRating;
-      const expectedWinner = 1 / (1 + Math.pow(10, (avgLoserRating - winnerRating) / 400));
-      const newWinnerRating = Math.round(winnerRating + K * (1 - expectedWinner));
-      const expectedLoser = 1 / (1 + Math.pow(10, (winnerRating - avgLoserRating) / 400));
-      const newLoserRating = Math.round(avgLoserRating + K * (0 - expectedLoser));
+      const players = aiResult.players ?? [];
+      const victoryNames = new Set((aiResult.victoryTeam ?? []).map((n) => n.trim().toLowerCase()));
+      const defeatNames = new Set((aiResult.defeatTeam ?? []).map((n) => n.trim().toLowerCase()));
+      const insertedProfileIds = new Set<string>();
 
-      await supabase.from('power_ratings').upsert(
-        [
-          {
-            profile_id: winnerId,
-            match_type: matchType,
-            rating: newWinnerRating,
-            wins: (winnerRow?.wins ?? 0) + 1,
-            losses: winnerRow?.losses ?? 0,
-            updated_at: new Date().toISOString(),
-          },
-          ...loserIds.map((id) => {
-            const row = ratingsMap.get(id);
-            return {
-              profile_id: id,
-              match_type: matchType,
-              rating: newLoserRating,
-              wins: row?.wins ?? 0,
-              losses: (row?.losses ?? 0) + 1,
-              updated_at: new Date().toISOString(),
-            };
-          }),
-        ],
-        { onConflict: 'profile_id,match_type' }
-      );
+      for (const player of players) {
+        const name = player.name?.trim();
+        if (!name) continue;
+        const nameLower = name.toLowerCase();
+        const entry = Array.from(tagToProfile.entries()).find(
+          ([tag]) => nameLower.includes(tag) || tag.includes(nameLower)
+        );
+        const profileId = entry ? entry[1] : null;
+        if (!profileId) continue;
 
-      const { data: allRatings } = await supabase
-        .from('power_ratings')
-        .select('profile_id, rating')
-        .in('profile_id', participants);
-      for (const pid of participants) {
-        const userRatings = (allRatings ?? []).filter((r) => r.profile_id === pid).map((r) => r.rating);
-        const maxRating = userRatings.length ? Math.max(...userRatings) : defaultRating;
-        await supabase.from('profiles').update({ power_level: maxRating, updated_at: new Date().toISOString() }).eq('id', pid);
+        const role = victoryNames.has(nameLower) ? 'winner' : defeatNames.has(nameLower) ? 'loser' : 'participant';
+        await supabase.from('match_result_players').insert({
+          result_id: resultData.id,
+          profile_id: profileId,
+          role,
+          points: player.points ?? 0,
+          in_game_name: name,
+          team: player.team === 'victory' ? 'red' : player.team === 'defeat' ? 'white' : null,
+        });
+        insertedProfileIds.add(profileId);
+      }
+
+      if (!insertedProfileIds.has(user.id)) {
+        const uploaderPlayer = players.find((p) => p.isUploader || gameTagMatches(gameTag, p.name));
+        const uploaderPoints = uploaderPlayer?.points ?? 0;
+        const uploaderRole = victoryNames.has((uploaderName ?? '').toLowerCase()) ? 'winner' : defeatNames.has((uploaderName ?? '').toLowerCase()) ? 'loser' : 'participant';
+        await supabase.from('match_result_players').insert({
+          result_id: resultData.id,
+          profile_id: user.id,
+          role: uploaderRole,
+          points: uploaderPoints,
+          in_game_name: uploaderName ?? gameTag,
+          team: victoryNames.has((uploaderName ?? '').toLowerCase()) ? 'red' : 'white',
+        });
       }
 
       router.push('/rankings/');
@@ -205,18 +228,19 @@ function SubmitResultContent() {
     }
   }
 
-  function addLoser(id: string) {
-    if (!loserIds.includes(id)) setLoserIds([...loserIds, id]);
-  }
-  function removeLoser(id: string) {
-    setLoserIds(loserIds.filter((x) => x !== id));
-  }
+  const gameTag = profile?.game_tag?.trim();
+  const uploaderName = aiResult?.uploaderName ?? aiResult?.winnerName;
+  const canSubmit =
+    aiResult &&
+    screenshotFile &&
+    gameTag &&
+    gameTagMatches(gameTag, uploaderName);
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
       <h1 className="font-display text-2xl font-bold text-text-primary mb-2">Submit Match Result</h1>
       <p className="text-text-muted mb-6">
-        Upload a Shinobi Strikers end-screen screenshot. Use AI to extract names or tag players manually.
+        Upload a Shinobi Strikers end-screen screenshot. AI extracts everything. Your in-game name must match the blue-highlighted player.
       </p>
 
       <AdSlot slotId="screenshots-submit-below" className="mb-6" />
@@ -245,7 +269,7 @@ function SubmitResultContent() {
         </div>
 
         <div>
-          <label className="block text-sm text-text-muted mb-2">Match type</label>
+          <label className="block text-sm text-text-muted mb-2">Match type (fallback if AI cannot detect)</label>
           <select
             value={matchType}
             onChange={(e) => setMatchType(e.target.value as MatchType)}
@@ -271,71 +295,32 @@ function SubmitResultContent() {
         )}
 
         {aiResult && (
-          <div className="p-3 rounded-lg bg-panel border border-border text-sm">
-            <p className="text-text-muted">AI extracted: Winner: {aiResult.winnerName ?? '?'}</p>
-            {aiResult.loserNames?.length ? (
-              <p className="text-text-muted">Losers: {aiResult.loserNames.join(', ')}</p>
+          <div className="p-3 rounded-lg bg-panel border border-border text-sm space-y-2">
+            <p className="text-text-muted">Uploader (blue): {aiResult.uploaderName ?? aiResult.winnerName ?? '?'}</p>
+            {aiResult.playTimeSec != null && <p className="text-text-muted">Play time: {Math.floor(aiResult.playTimeSec / 60)}:{String(aiResult.playTimeSec % 60).padStart(2, '0')}</p>}
+            {aiResult.resultsRemainingSec != null && <p className="text-text-muted">Remaining: {aiResult.resultsRemainingSec}s</p>}
+            {aiResult.players?.length ? (
+              <div className="mt-2">
+                <p className="text-text-muted font-medium mb-1">Players & points:</p>
+                {aiResult.players.map((p, i) => (
+                  <p key={i} className="text-text-muted text-xs">
+                    {p.name}: {p.points} pts {p.isUploader ? '(you)' : ''}
+                  </p>
+                ))}
+              </div>
             ) : null}
           </div>
         )}
 
-        <div>
-          <label className="block text-sm text-text-muted mb-2">Winner</label>
-          <select
-            value={winnerId ?? ''}
-            onChange={(e) => setWinnerId(e.target.value || null)}
-            className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary"
-          >
-            <option value="">Select winner</option>
-            {profiles.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.username}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm text-text-muted mb-2">Loser(s)</label>
-          <select
-            value=""
-            onChange={(e) => {
-              const id = e.target.value;
-              if (id) addLoser(id);
-              e.target.value = '';
-            }}
-            className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary mb-2"
-          >
-            <option value="">Add loser</option>
-            {profiles.filter((p) => p.id !== winnerId && !loserIds.includes(p.id)).map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.username}
-              </option>
-            ))}
-          </select>
-          <div className="flex flex-wrap gap-2">
-            {loserIds.map((id) => {
-              const p = profiles.find((x) => x.id === id);
-              return (
-                <span
-                  key={id}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded bg-accent/10 text-text-primary text-sm"
-                >
-                  {p?.username ?? id}
-                  <button type="button" onClick={() => removeLoser(id)} className="text-accent hover:opacity-80">
-                    ×
-                  </button>
-                </span>
-              );
-            })}
-          </div>
-        </div>
+        {!gameTag && (
+          <p className="text-amber-500 text-sm">Set your in-game name in Profile to submit.</p>
+        )}
 
         {error && <p className="text-accent text-sm">{error}</p>}
 
         <button
           type="submit"
-          disabled={submitting || !winnerId}
+          disabled={submitting || !canSubmit}
           className="w-full py-3 rounded-lg bg-accent text-white font-semibold hover:opacity-90 disabled:opacity-50"
         >
           {submitting ? 'Submitting...' : 'Submit Result'}

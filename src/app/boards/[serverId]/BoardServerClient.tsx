@@ -15,6 +15,7 @@ export function BoardServerClient() {
   const [server, setServer] = useState<Server | null>(null)
   const [channels, setChannels] = useState<Channel[]>([])
   const [isMember, setIsMember] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -29,8 +30,9 @@ export function BoardServerClient() {
         .order('name')
       setChannels(channelsData ?? [])
       if (user) {
-        const { data: mem } = await supabase.from('server_members').select('id').eq('server_id', serverId).eq('user_id', user.id).single()
+        const { data: mem } = await supabase.from('server_members').select('id, role').eq('server_id', serverId).eq('user_id', user.id).single()
         setIsMember(!!mem)
+        setUserRole(mem?.role ?? null)
       }
       setLoading(false)
     }
@@ -48,7 +50,7 @@ export function BoardServerClient() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       <Link href="/boards/" className="inline-block mb-4 text-text-muted hover:text-accent">← Back to Clans</Link>
-      <ClanProfileView server={server} channels={channels} serverId={serverId} isMember={isMember} />
+      <ClanProfileView server={server} channels={channels} serverId={serverId} isMember={isMember} userRole={userRole} />
     </div>
   )
 }
