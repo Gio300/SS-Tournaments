@@ -713,3 +713,9 @@ drop policy if exists "Users update tournaments" on public.tournaments;
 create policy "Users update tournaments" on public.tournaments for update using (auth.uid() is not null);
 drop policy if exists "Users delete tournaments" on public.tournaments;
 create policy "Users delete tournaments" on public.tournaments for delete using (auth.uid() is not null);
+
+-- Tournament and match status (open/closed)
+alter table public.tournaments add column if not exists status text default 'open' check (status in ('open', 'closed'));
+alter table public.tournaments add column if not exists ends_at timestamptz;
+alter table public.matches add column if not exists scheduled_at timestamptz;
+alter table public.matches add column if not exists status text default 'open' check (status in ('open', 'closed'));

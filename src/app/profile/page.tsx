@@ -35,6 +35,7 @@ function ProfileContent() {
   const [status, setStatus] = useState('')
   const [gameTag, setGameTag] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [trophyTypes, setTrophyTypes] = useState<string[]>([])
 
   useEffect(() => {
     setUsername(profile?.username ?? '')
@@ -42,6 +43,16 @@ function ProfileContent() {
     setStatus(profile?.status ?? '')
     setGameTag(profile?.game_tag ?? '')
   }, [profile])
+
+  useEffect(() => {
+    if (!user) return
+    const uid = user.id
+    async function fetchTrophies() {
+      const { data } = await supabase.from('trophies').select('trophy_type').eq('profile_id', uid)
+      setTrophyTypes((data ?? []).map((t) => t.trophy_type))
+    }
+    fetchTrophies()
+  }, [user?.id])
 
   useEffect(() => {
     if (!user) return

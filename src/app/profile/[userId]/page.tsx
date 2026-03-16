@@ -85,7 +85,10 @@ export default function ProfileViewPage() {
         ))}
       </div>
       {reels.length === 0 && <p className="text-text-muted">No reels yet.</p>}
-      <Link href="/profile/" className="inline-block mt-6 text-accent hover:underline text-sm">← Back to my profile</Link>
+      <div className="flex gap-4 mt-6">
+        <Link href="/profile/" className="text-accent hover:underline text-sm">← My profile</Link>
+        <Link href="/following/" className="text-accent hover:underline text-sm">Following</Link>
+      </div>
     </div>
   )
 }

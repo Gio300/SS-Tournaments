@@ -26,6 +26,7 @@ const moreLinks = [
   { href: '/submit-result/', label: 'Submit Result' },
   { href: '/community/', label: 'Community' },
   { href: '/search/', label: 'Search' },
+  { href: '/following/', label: 'Following' },
 ];
 
 export function Nav() {

@@ -26,6 +26,8 @@ function SettingsContent() {
   const { user, profile, refreshProfile } = useAuth();
   const { theme, setTheme, colorScheme, setColorScheme } = useTheme();
   const [activeSection, setActiveSection] = useState<'appearance' | 'account' | 'help'>('appearance');
+  const [aiWorkerUrl, setAiWorkerUrl] = useState('');
+  const [aiUrlSaved, setAiUrlSaved] = useState(false);
   const [textScale, setTextScale] = useState(1);
   const [previewMode, setPreviewMode] = useState<'phone' | 'desktop'>('desktop');
   const [username, setUsername] = useState('');
@@ -179,7 +181,7 @@ function SettingsContent() {
                   style={{
                     backgroundColor: s === 'red' ? '#E10600' : s === 'blue' ? '#3B82F6' : s === 'green' ? '#22c55e' : s === 'purple' ? '#A855F7' : '#F97316',
                     color: 'white',
-                    ringColor: colorScheme === s ? (s === 'red' ? '#E10600' : s === 'blue' ? '#3B82F6' : s === 'green' ? '#22c55e' : s === 'purple' ? '#A855F7' : '#F97316') : undefined,
+                    ...(colorScheme === s ? { boxShadow: `0 0 0 2px ${s === 'red' ? '#E10600' : s === 'blue' ? '#3B82F6' : s === 'green' ? '#22c55e' : s === 'purple' ? '#A855F7' : '#F97316'}` } : {}),
                   }}
                 >
                   {s}

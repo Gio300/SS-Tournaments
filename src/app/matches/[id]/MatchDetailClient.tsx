@@ -39,6 +39,14 @@ export function MatchDetailClient() {
     fetch()
   }, [id])
 
+  async function handleClose() {
+    if (!match || !user) return
+    setClosing(true)
+    const { error } = await supabase.from('matches').update({ status: 'closed' }).eq('id', id)
+    setClosing(false)
+    if (!error) setMatch((m) => (m ? { ...m, status: 'closed' } : null))
+  }
+
   if (loading || !match) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 flex items-center justify-center">

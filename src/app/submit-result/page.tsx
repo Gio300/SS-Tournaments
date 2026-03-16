@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { getWorkerUrl } from '@/lib/workerUrl';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthGuard } from '@/components/AuthGuard';
 import { AdSlot } from '@/components/AdSlot';
