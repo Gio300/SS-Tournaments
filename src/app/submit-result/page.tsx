@@ -64,9 +64,9 @@ function SubmitResultContent() {
 
   function gameTagMatches(tag: string | null | undefined, inGameName: string | null | undefined): boolean {
     if (!tag?.trim() || !inGameName?.trim()) return false;
-    const t = tag.trim().toLowerCase();
-    const n = inGameName.trim().toLowerCase();
-    return n.includes(t) || t.includes(n);
+    const t = tag.trim().toLowerCase().replace(/\s+/g, '');
+    const n = inGameName.trim().toLowerCase().replace(/\s+/g, '');
+    return n.includes(t) || t.includes(n) || n === t;
   }
 
   async function handleAnalyze() {
@@ -124,16 +124,27 @@ function SubmitResultContent() {
       const buf = await screenshotFile.arrayBuffer();
       const screenshotHash = await sha256Hex(buf);
 
-      if (playTimeSec != null && resultsRemainingSec != null && screenshotHash) {
-        const { data: existing } = await supabase
-          .from('match_results')
-          .select('id')
-          .eq('play_time_sec', playTimeSec)
-          .eq('results_remaining_sec', resultsRemainingSec)
-          .eq('screenshot_hash', screenshotHash)
-          .limit(1);
-        if (existing?.length) {
-          setError('This screenshot was already submitted.');
+      if (screenshotHash) {
+        let isDuplicate = false;
+        if (playTimeSec != null && resultsRemainingSec != null) {
+          const { data: existing } = await supabase
+            .from('match_results')
+            .select('id')
+            .eq('play_time_sec', playTimeSec)
+            .eq('results_remaining_sec', resultsRemainingSec)
+            .eq('screenshot_hash', screenshotHash)
+            .limit(1);
+          isDuplicate = (existing?.length ?? 0) > 0;
+        } else {
+          const { data: existingByHash } = await supabase
+            .from('match_results')
+            .select('id')
+            .eq('screenshot_hash', screenshotHash)
+            .limit(1);
+          isDuplicate = (existingByHash?.length ?? 0) > 0;
+        }
+        if (isDuplicate) {
+          setError('Duplicate screenshot: this result was already submitted. Each screenshot can only be submitted once.');
           setSubmitting(false);
           return;
         }
@@ -283,6 +294,14 @@ function SubmitResultContent() {
           </select>
         </div>
 
+        {!workerUrl && (
+          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400">
+            <p className="font-medium">AI not configured</p>
+            <p className="text-sm mt-1">Screenshot extraction requires NEXT_PUBLIC_CF_WORKER_URL. Add it in GitHub repo Secrets for deployment, or in .env.local for local dev.</p>
+            <Link href="/profile/" className="inline-block mt-2 text-sm underline">Set up Profile first</Link>
+          </div>
+        )}
+
         {screenshotFile && workerUrl && (
           <button
             type="button"
@@ -312,9 +331,24 @@ function SubmitResultContent() {
           </div>
         )}
 
-        {!gameTag && (
-          <p className="text-amber-500 text-sm">Set your in-game name in Profile to submit.</p>
-        )}
+        <div className="p-3 rounded-lg bg-panel border border-border text-sm space-y-1">
+          <p className="font-medium text-text-muted mb-2">Requirements to submit:</p>
+          <p className={screenshotFile ? 'text-green-600' : 'text-text-muted'}>
+            {screenshotFile ? '✓' : '○'} Select screenshot
+          </p>
+          <p className={workerUrl ? 'text-green-600' : 'text-amber-500'}>
+            {workerUrl ? '✓' : '○'} AI configured (Cloudflare Worker)
+          </p>
+          <p className={screenshotFile && aiResult ? 'text-green-600' : 'text-text-muted'}>
+            {screenshotFile && aiResult ? '✓' : '○'} Extract with AI (click button above)
+          </p>
+          <p className={gameTag ? 'text-green-600' : 'text-amber-500'}>
+            {gameTag ? '✓' : '○'} Game tag set in Profile ({gameTag ? `"${gameTag}"` : 'not set'})
+          </p>
+          <p className={aiResult && gameTag && gameTagMatches(gameTag, uploaderName) ? 'text-green-600' : 'text-text-muted'}>
+            {aiResult && gameTag && gameTagMatches(gameTag, uploaderName) ? '✓' : '○'} Game tag matches blue-highlighted name ({uploaderName ? `"${uploaderName}"` : '—'})
+          </p>
+        </div>
 
         {error && <p className="text-accent text-sm">{error}</p>}
 

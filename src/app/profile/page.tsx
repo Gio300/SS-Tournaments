@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { AuthGuard } from '@/components/AuthGuard'
 import { PostComposer } from '@/components/PostComposer'
 import { PostCard } from '@/components/PostCard'
+import { TrophyBadges } from '@/components/TrophyBadges'
 import type { Reel, UserYoutubeLink, Post, PostAttachment, PostPoll, PostPollOption } from '@/types/database'
 
 type ReelWithProfile = Reel & { profiles?: { username: string; power_level?: number } }
@@ -289,7 +290,10 @@ function ProfileContent() {
             ) : (
               <>
                 <h1 className="font-display text-xl font-bold text-text-primary">{username}</h1>
-                <p className="text-accent text-sm mt-1">Power level: {profile?.power_level ?? 0} pts</p>
+                <p className="text-accent text-sm mt-1 flex items-center">
+                  Power level: {profile?.power_level ?? 0} pts
+                  <TrophyBadges trophyTypes={trophyTypes} />
+                </p>
                 {gameTag && <p className="text-text-muted text-sm mt-1">In-game: {gameTag}</p>}
                 {status && <p className="text-text-muted mt-2 italic">&quot;{status}&quot;</p>}
                 {bio && <p className="text-text-muted mt-2">{bio}</p>}

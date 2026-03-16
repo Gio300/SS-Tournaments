@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Trophy } from 'lucide-react';
+import { TrophyBadges } from '@/components/TrophyBadges';
 import { supabase } from '@/lib/supabase';
 import { AdSlot } from '@/components/AdSlot';
 import type { MatchType } from '@/types/database';
@@ -17,7 +18,10 @@ const MATCH_TYPES: { value: MatchType; label: string }[] = [
 ];
 
 const TROPHY_LABELS: Record<string, string> = {
-  its_over_9000: "It's over 9000!",
+  centurion: 'Centurion (100+ pts)',
+  top_dog: 'Top Dog (1k+ pts)',
+  legendary: 'Legendary (5k+ pts)',
+  its_over_9000: "It's over 9000! (9k+ pts)",
 };
 
 type RankingRow = {
@@ -206,7 +210,12 @@ export default function RankingsPage() {
                         {r.username}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-accent font-semibold">{r.points}</td>
+                    <td className="px-4 py-3">
+                      <span className="text-accent font-semibold inline-flex items-center">
+                        {r.points}
+                        <TrophyBadges trophyTypes={r.trophy_types} />
+                      </span>
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
                         {r.trophy_types.map((t) => (

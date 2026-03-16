@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
+import { TrophyBadges } from '@/components/TrophyBadges'
 import type { Reel } from '@/types/database'
 
 type ReelWithProfile = Reel & { profiles?: { username: string } }
@@ -16,23 +17,24 @@ export default function ProfileViewPage() {
   const { user } = useAuth()
   const [profile, setProfile] = useState<{ id: string; username: string; avatar_url: string | null; bio: string | null; status: string | null; power_level: number | null } | null>(null)
   const [reels, setReels] = useState<ReelWithProfile[]>([])
+  const [trophyTypes, setTrophyTypes] = useState<string[]>([])
 
   useEffect(() => {
     if (!userId) return
     async function fetch() {
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('id, username, avatar_url, bio')
+        .select('id, username, avatar_url, bio, status, power_level')
         .eq('id', userId)
         .single()
       setProfile(profileData ?? null)
       if (profileData) {
-        const { data: reelsData } = await supabase
-          .from('reels')
-          .select('*, profiles(username)')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
+        const [{ data: reelsData }, { data: trophiesData }] = await Promise.all([
+          supabase.from('reels').select('*, profiles(username)').eq('user_id', userId).order('created_at', { ascending: false }),
+          supabase.from('trophies').select('trophy_type').eq('profile_id', userId),
+        ])
         setReels(reelsData ?? [])
+        setTrophyTypes((trophiesData ?? []).map((t) => t.trophy_type))
       }
     }
     fetch()
@@ -59,7 +61,10 @@ export default function ProfileViewPage() {
           )}
           <div className="flex-1">
             <h1 className="font-display text-xl font-bold text-text-primary">{profile.username}</h1>
-            <p className="text-accent text-sm mt-1">Power level: {profile.power_level ?? 0} pts</p>
+            <p className="text-accent text-sm mt-1 flex items-center">
+              Power level: {profile.power_level ?? 0} pts
+              <TrophyBadges trophyTypes={trophyTypes} />
+            </p>
             {profile.status && <p className="text-text-muted mt-2 italic">&quot;{profile.status}&quot;</p>}
             {profile.bio && <p className="text-text-muted mt-2">{profile.bio}</p>}
           </div>
