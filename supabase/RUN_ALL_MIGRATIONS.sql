@@ -216,7 +216,7 @@ create policy "StrikerClips users delete own avatars" on storage.objects for del
 
 do $$ begin alter table public.channels add constraint channels_server_name_unique unique (server_id, name); exception when duplicate_object then null; end $$;
 
-insert into public.servers (id, name, clan_tag) values ('00000000-0000-0000-0000-000000000001', 'SmashHub Highlights', 'SML') on conflict (id) do update set name = excluded.name, clan_tag = coalesce(excluded.clan_tag, servers.clan_tag);
+insert into public.servers (id, name, clan_tag) values ('00000000-0000-0000-0000-000000000001', 'SmashHub Highlights', null) on conflict (id) do update set name = excluded.name, clan_tag = excluded.clan_tag;
 insert into public.channels (server_id, name, type) values ('00000000-0000-0000-0000-000000000001', 'general', 'text'), ('00000000-0000-0000-0000-000000000001', 'highlights', 'clips'), ('00000000-0000-0000-0000-000000000001', 'clips', 'clips') on conflict (server_id, name) do nothing;
 
 -- ========== 2. Live groups + user_youtube_links (003) ==========
@@ -302,3 +302,9 @@ end $$;
 -- ========== 6. YouTube + Facebook columns (007) ==========
 do $$ begin alter table public.profiles add column if not exists youtube_channel_id text; exception when others then null; end $$;
 do $$ begin alter table public.profiles add column if not exists facebook_id text; exception when others then null; end $$;
+
+-- ========== 7. Tournament and match status (008) ==========
+do $$ begin alter table public.matches add column if not exists scheduled_at timestamptz; exception when others then null; end $$;
+do $$ begin alter table public.tournaments add column if not exists status text default 'open' check (status in ('open', 'closed')); exception when others then null; end $$;
+do $$ begin alter table public.tournaments add column if not exists ends_at timestamptz; exception when others then null; end $$;
+do $$ begin alter table public.matches add column if not exists status text default 'open' check (status in ('open', 'closed')); exception when others then null; end $$;

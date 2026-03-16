@@ -2,34 +2,31 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Calendar, Radio, Swords, Trophy } from 'lucide-react'
+import { Calendar, Radio, Swords, Trophy, CheckCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import type { Match } from '@/types/database'
 
 export default function MatchesPage() {
-  const [section, setSection] = useState<'live' | 'upcoming' | 'played' | 'tournaments'>('played')
+  const [section, setSection] = useState<'live' | 'upcoming' | 'played' | 'closed' | 'tournaments'>('played')
   const [matches, setMatches] = useState<Match[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (section !== 'played' && section !== 'upcoming') return
+    if (section !== 'played' && section !== 'upcoming' && section !== 'closed') return
     async function fetch() {
       setLoading(true)
       const now = new Date().toISOString()
+      const { data } = await supabase
+        .from('matches')
+        .select('*')
+        .order(section === 'upcoming' ? 'scheduled_at' : 'created_at', { ascending: section === 'upcoming' })
+      const list = (data ?? []) as Match[]
       if (section === 'upcoming') {
-        const { data } = await supabase
-          .from('matches')
-          .select('*')
-          .not('scheduled_at', 'is', null)
-          .gt('scheduled_at', now)
-          .order('scheduled_at', { ascending: true })
-        setMatches(data ?? [])
+        setMatches(list.filter((m) => m.scheduled_at && m.scheduled_at > now && (m.status ?? 'open') !== 'closed'))
+      } else if (section === 'closed') {
+        setMatches(list.filter((m) => m.status === 'closed'))
       } else {
-        const { data } = await supabase
-          .from('matches')
-          .select('*')
-          .order('created_at', { ascending: false })
-        setMatches(data ?? [])
+        setMatches(list.filter((m) => (m.status ?? 'open') !== 'closed'))
       }
       setLoading(false)
     }
@@ -66,7 +63,16 @@ export default function MatchesPage() {
             section === 'played' ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'
           }`}
         >
-          <Swords size={18} /> Played
+          <Swords size={18} /> Open
+        </button>
+        <button
+          type="button"
+          onClick={() => setSection('closed')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
+            section === 'closed' ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'
+          }`}
+        >
+          <CheckCircle size={18} /> Results
         </button>
         <button
           type="button"
@@ -75,7 +81,7 @@ export default function MatchesPage() {
             section === 'tournaments' ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'
           }`}
         >
-          <Trophy size={18} /> Tournaments
+          Tournaments
         </button>
       </div>
 
@@ -101,7 +107,10 @@ export default function MatchesPage() {
                   href={`/matches/${match.id}/`}
                   className="rounded-xl border border-border bg-panel p-6 hover:border-accent/50 transition"
                 >
-                  <h2 className="font-semibold text-lg text-text-primary">{match.name}</h2>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-semibold text-lg text-text-primary">{match.name}</h2>
+                    <span className="text-xs px-2 py-0.5 rounded bg-accent/20 text-accent">Open</span>
+                  </div>
                   <p className="text-sm text-accent mt-2">
                     {match.scheduled_at
                       ? new Date(match.scheduled_at).toLocaleString(undefined, {
@@ -145,6 +154,38 @@ export default function MatchesPage() {
         </div>
       )}
 
+      {section === 'closed' && (
+        <>
+          {loading ? (
+            <div className="flex justify-center py-16">
+              <span className="animate-pulse text-accent">Loading match results...</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {matches.map((match) => (
+                <Link
+                  key={match.id}
+                  href={`/matches/${match.id}/`}
+                  className="rounded-xl border border-border bg-panel p-6 hover:border-accent/50 transition opacity-90"
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-semibold text-lg text-text-primary">{match.name}</h2>
+                    <span className="text-xs px-2 py-0.5 rounded bg-panel border border-border text-text-muted">Closed</span>
+                  </div>
+                  <p className="text-sm text-text-muted mt-2 line-clamp-2">{match.description}</p>
+                  <p className="text-xs text-accent mt-4">{match.reel_ids?.length ?? 0} reels</p>
+                </Link>
+              ))}
+            </div>
+          )}
+          {!loading && matches.length === 0 && (
+            <div className="text-center py-16 text-text-muted">
+              <p>No closed matches yet.</p>
+            </div>
+          )}
+        </>
+      )}
+
       {section === 'played' && (
         <>
           <div className="flex justify-end mb-6">
@@ -167,7 +208,10 @@ export default function MatchesPage() {
                   href={`/matches/${match.id}/`}
                   className="rounded-xl border border-border bg-panel p-6 hover:border-accent/50 transition"
                 >
-                  <h2 className="font-semibold text-lg text-text-primary">{match.name}</h2>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-semibold text-lg text-text-primary">{match.name}</h2>
+                    <span className="text-xs px-2 py-0.5 rounded bg-accent/20 text-accent">Open</span>
+                  </div>
                   <p className="text-sm text-text-muted mt-2 line-clamp-2">{match.description}</p>
                   <p className="text-xs text-accent mt-4">{match.reel_ids?.length ?? 0} reels</p>
                 </Link>

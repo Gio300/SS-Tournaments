@@ -4,15 +4,18 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/hooks/useAuth'
 import type { Match, Reel, Clip } from '@/types/database'
 
 export function MatchDetailClient() {
   const params = useParams()
   const id = params.id as string
+  const { user } = useAuth()
   const [match, setMatch] = useState<Match | null>(null)
   const [reels, setReels] = useState<Reel[]>([])
   const [clips, setClips] = useState<Clip[]>([])
   const [loading, setLoading] = useState(true)
+  const [closing, setClosing] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -49,9 +52,28 @@ export function MatchDetailClient() {
 
   const liveStreamId = match.live_stream_url?.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1]
 
+  const isClosed = match.status === 'closed'
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="font-display text-2xl font-bold text-text-primary mb-2">{match.name}</h1>
+      <div className="flex flex-wrap items-center gap-2 mb-2">
+        <h1 className="font-display text-2xl font-bold text-text-primary">{match.name}</h1>
+        {isClosed ? (
+          <span className="text-xs px-2 py-0.5 rounded bg-panel border border-border text-text-muted">Closed</span>
+        ) : (
+          <span className="text-xs px-2 py-0.5 rounded bg-accent/20 text-accent">Open</span>
+        )}
+        {user && !isClosed && (
+          <button
+            type="button"
+            onClick={handleClose}
+            disabled={closing}
+            className="text-sm px-3 py-1 rounded border border-border text-text-muted hover:text-accent hover:border-accent transition disabled:opacity-50"
+          >
+            {closing ? 'Closing...' : 'Close match'}
+          </button>
+        )}
+      </div>
       {match.description && <p className="text-text-muted mb-8">{match.description}</p>}
       {liveStreamId && (
         <div className="mb-8">

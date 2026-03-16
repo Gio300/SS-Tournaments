@@ -90,7 +90,7 @@ export function ClanProfileView({ server, channels, serverId, isMember, userRole
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="font-display text-2xl font-bold text-text-primary">{server.name}</h1>
-                {server.clan_tag && (
+                {server.clan_tag && server.clan_tag !== 'SML' && (
                   <span className="text-accent font-mono text-lg">[{server.clan_tag}]</span>
                 )}
                 {isUltra && (

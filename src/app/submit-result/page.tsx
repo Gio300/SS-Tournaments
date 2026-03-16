@@ -44,7 +44,7 @@ function SubmitResultContent() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const workerUrl = process.env.NEXT_PUBLIC_CF_WORKER_URL;
+  const workerUrl = typeof window !== 'undefined' ? getWorkerUrl() : process.env.NEXT_PUBLIC_CF_WORKER_URL;
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -70,8 +70,9 @@ function SubmitResultContent() {
   }
 
   async function handleAnalyze() {
-    if (!screenshotFile || !workerUrl) {
-      setError(workerUrl ? 'Select a screenshot first' : 'AI not configured. Set NEXT_PUBLIC_CF_WORKER_URL.');
+    const url = getWorkerUrl();
+    if (!screenshotFile || !url) {
+      setError(url ? 'Select a screenshot first' : 'AI not configured. Add your Cloudflare Worker URL in Settings → Appearance.');
       return;
     }
     setAnalyzing(true);
@@ -82,7 +83,7 @@ function SubmitResultContent() {
       let binary = '';
       for (let i = 0; i < arr.length; i++) binary += String.fromCharCode(arr[i]);
       const base64 = btoa(binary);
-      const base = workerUrl.replace(/\/$/, '');
+      const base = url.replace(/\/$/, '');
       const res = await fetch(`${base}/screenshot-analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -297,7 +298,7 @@ function SubmitResultContent() {
         {!workerUrl && (
           <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400">
             <p className="font-medium">AI not configured</p>
-            <p className="text-sm mt-1">Screenshot extraction requires NEXT_PUBLIC_CF_WORKER_URL. Add it in GitHub repo Secrets for deployment, or in .env.local for local dev.</p>
+            <p className="text-sm mt-1">Screenshot extraction requires a Cloudflare Worker URL. Configure it in Settings → Appearance.</p>
             <Link href="/profile/" className="inline-block mt-2 text-sm underline">Set up Profile first</Link>
           </div>
         )}

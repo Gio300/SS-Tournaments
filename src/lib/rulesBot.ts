@@ -2,6 +2,7 @@ import { getAllRuleTexts } from '@/data/rules';
 import { FAQ_ENTRIES } from '@/data/rules';
 import { getRulesContext } from '@/data/rulesContext';
 import { getHelpReply } from '@/data/helpTopics';
+import { getWorkerUrl } from '@/lib/workerUrl';
 
 export interface BotMessage {
   role: 'user' | 'assistant';
@@ -156,7 +157,7 @@ export async function getAIBotReply(userMessage: string): Promise<string> {
   const helpAnswer = getHelpReply(trimmed);
   if (helpAnswer) return helpAnswer;
 
-  const workerUrl = process.env.NEXT_PUBLIC_CF_WORKER_URL;
+  const workerUrl = getWorkerUrl();
   
   // If no worker URL configured, fall back to keyword matching
   if (!workerUrl) {

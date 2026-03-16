@@ -99,7 +99,7 @@ export default function BoardsPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h2 className="font-semibold text-text-primary">
                       {server.name}
-                      {server.clan_tag && (
+                      {server.clan_tag && server.clan_tag !== 'SML' && (
                         <span className="ml-2 text-accent text-sm font-mono">[{server.clan_tag}]</span>
                       )}
                     </h2>

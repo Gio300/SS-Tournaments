@@ -31,6 +31,9 @@ export default function TournamentsPage() {
     fetch();
   }, []);
 
+  const openTournaments = tournaments.filter((t) => (t.status ?? 'open') === 'open');
+  const closedTournaments = tournaments.filter((t) => t.status === 'closed');
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
@@ -158,18 +161,48 @@ export default function TournamentsPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {tournaments.map((t) => (
-            <Link
-              key={t.id}
-              href={`/tournaments/${t.id}/`}
-              className="rounded-xl border border-border bg-panel p-6 hover:border-accent/50 transition"
-            >
-              <h2 className="font-semibold text-lg text-text-primary">{t.name}</h2>
-              <p className="text-sm text-text-muted mt-2 line-clamp-2">{t.description ?? 'No description'}</p>
-              {t.rules && <p className="text-xs text-accent mt-2">Has rules</p>}
-            </Link>
-          ))}
+        <div className="space-y-10">
+          {openTournaments.length > 0 && (
+            <section>
+              <h2 className="text-lg font-semibold text-text-primary mb-4">Open Tournaments</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {openTournaments.map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/tournaments/${t.id}/`}
+                    className="rounded-xl border border-border bg-panel p-6 hover:border-accent/50 transition"
+                  >
+                    <h2 className="font-semibold text-lg text-text-primary">{t.name}</h2>
+                    <p className="text-sm text-text-muted mt-2 line-clamp-2">{t.description ?? 'No description'}</p>
+                    {t.rules && <p className="text-xs text-accent mt-2">Has rules</p>}
+                    <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded bg-accent/20 text-accent">Open</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+          {closedTournaments.length > 0 && (
+            <section>
+              <h2 className="text-lg font-semibold text-text-primary mb-4">Tournament Results</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {closedTournaments.map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/tournaments/${t.id}/`}
+                    className="rounded-xl border border-border bg-panel p-6 hover:border-accent/50 transition opacity-90"
+                  >
+                    <h2 className="font-semibold text-lg text-text-primary">{t.name}</h2>
+                    <p className="text-sm text-text-muted mt-2 line-clamp-2">{t.description ?? 'No description'}</p>
+                    {t.rules && <p className="text-xs text-accent mt-2">Has rules</p>}
+                    <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded bg-panel border border-border text-text-muted">Closed</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+          {openTournaments.length === 0 && closedTournaments.length === 0 && (
+            <p className="text-text-muted">No tournaments yet.</p>
+          )}
         </div>
       )}
     </div>

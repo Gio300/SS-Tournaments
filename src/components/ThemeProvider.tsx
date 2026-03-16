@@ -3,26 +3,38 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
+type ColorScheme = 'red' | 'blue' | 'green' | 'purple' | 'orange';
 
 const ThemeContext = createContext<{
   theme: Theme;
   setTheme: (t: Theme) => void;
   toggleTheme: () => void;
+  colorScheme: ColorScheme;
+  setColorScheme: (s: ColorScheme) => void;
 } | null>(null);
 
-const STORAGE_KEY = 'smashhub-theme';
+const THEME_KEY = 'smashhub-theme';
+const COLOR_SCHEME_KEY = 'smashhub-color-scheme';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
+  const [colorScheme, setColorSchemeState] = useState<ColorScheme>('red');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (stored === 'light' || stored === 'dark') {
-      setThemeState(stored);
-      document.documentElement.setAttribute('data-theme', stored);
+    const storedTheme = localStorage.getItem(THEME_KEY) as Theme | null;
+    const storedScheme = localStorage.getItem(COLOR_SCHEME_KEY) as ColorScheme | null;
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      setThemeState(storedTheme);
+      document.documentElement.setAttribute('data-theme', storedTheme);
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    if (storedScheme && ['red', 'blue', 'green', 'purple', 'orange'].includes(storedScheme)) {
+      setColorSchemeState(storedScheme);
+      document.documentElement.setAttribute('data-accent-scheme', storedScheme);
+    } else {
+      document.documentElement.setAttribute('data-accent-scheme', 'red');
     }
     setMounted(true);
   }, []);
@@ -30,14 +42,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!mounted) return;
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem(STORAGE_KEY, theme);
+    localStorage.setItem(THEME_KEY, theme);
   }, [theme, mounted]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    document.documentElement.setAttribute('data-accent-scheme', colorScheme);
+    localStorage.setItem(COLOR_SCHEME_KEY, colorScheme);
+  }, [colorScheme, mounted]);
 
   const setTheme = (t: Theme) => setThemeState(t);
   const toggleTheme = () => setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  const setColorScheme = (s: ColorScheme) => setColorSchemeState(s);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme, colorScheme, setColorScheme }}>
       {children}
     </ThemeContext.Provider>
   );

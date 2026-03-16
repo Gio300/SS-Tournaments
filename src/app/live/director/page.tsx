@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Radio } from 'lucide-react';
+import { getWorkerUrl } from '@/lib/workerUrl';
 
 function extractYouTubeId(url: string): string | null {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -69,7 +70,7 @@ export default function DirectorPage() {
 
       {!workerUrl && (
         <div className="p-4 rounded-lg border border-accent bg-accent/10 text-accent mb-6">
-          Set NEXT_PUBLIC_CF_WORKER_URL to enable AI Director.
+          Configure AI Worker URL in Settings → Appearance to enable AI Director.
         </div>
       )}
 

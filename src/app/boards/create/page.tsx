@@ -65,7 +65,7 @@ function CreateServerContent() {
             value={clanTag}
             onChange={(e) => setClanTag(e.target.value.toUpperCase().slice(0, 8))}
             className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary focus:outline-none focus:border-accent"
-            placeholder="SML"
+            placeholder="e.g. ABC"
             maxLength={8}
           />
         </div>

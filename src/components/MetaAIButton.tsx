@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Sparkles } from 'lucide-react';
+import { getWorkerUrl } from '@/lib/workerUrl';
 
 const ACTIONS = [
   { id: 'rewrite', label: 'Rewrite', desc: 'Improve clarity and grammar' },
@@ -37,12 +38,12 @@ export function MetaAIButton({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const workerUrl = process.env.NEXT_PUBLIC_CF_WORKER_URL;
   const hasInput = body.trim().length > 0 || (pollQuestion ?? '').trim().length > 0;
 
   async function runAction(action: string) {
-    if (!workerUrl) {
-      setError('AI assist not configured. Set NEXT_PUBLIC_CF_WORKER_URL.');
+    const url = getWorkerUrl();
+    if (!url) {
+      setError('AI assist not configured. Add your Cloudflare Worker URL in Settings → Appearance.');
       return;
     }
     const isPollAction = action === 'suggest_poll_options';
@@ -57,7 +58,7 @@ export function MetaAIButton({
     setError('');
     setLoading(true);
     try {
-      const base = workerUrl.replace(/\/$/, '');
+      const base = url.replace(/\/$/, '');
       const res = await fetch(`${base}/assist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

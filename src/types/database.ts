@@ -45,6 +45,7 @@ export interface Match {
   live_stream_url: string | null
   scheduled_at: string | null
   created_at: string
+  status?: 'open' | 'closed'
 }
 
 export interface Tournament {
@@ -57,6 +58,8 @@ export interface Tournament {
   rules?: string | null
   stat_check_times?: Json | null
   tournament_days_times?: Json | null
+  status?: 'open' | 'closed'
+  ends_at?: string | null
 }
 
 export interface LiveStream {

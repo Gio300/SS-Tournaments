@@ -5,6 +5,7 @@ import { Sun, Moon, Smartphone, Monitor, Send, Bot } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
+import { getWorkerUrl, setWorkerUrl, getStoredWorkerUrl } from '@/lib/workerUrl';
 import { FaqAccordion } from '@/components/FaqAccordion';
 import { getAIBotReply, type BotMessage } from '@/lib/rulesBot';
 import { FAQ_ENTRIES } from '@/data/rules';
@@ -23,7 +24,7 @@ const TEXT_SCALES = [0.9, 1, 1.1, 1.2];
 
 function SettingsContent() {
   const { user, profile, refreshProfile } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, colorScheme, setColorScheme } = useTheme();
   const [activeSection, setActiveSection] = useState<'appearance' | 'account' | 'help'>('appearance');
   const [textScale, setTextScale] = useState(1);
   const [previewMode, setPreviewMode] = useState<'phone' | 'desktop'>('desktop');
@@ -43,6 +44,12 @@ function SettingsContent() {
     setGameTag(profile?.game_tag ?? '');
     setEmail(user?.email ?? '');
   }, [profile, user]);
+
+  useEffect(() => {
+    const stored = getStoredWorkerUrl();
+    const env = process.env.NEXT_PUBLIC_CF_WORKER_URL;
+    setAiWorkerUrl(stored || env || '');
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem('smashhub-text-scale');
@@ -135,6 +142,51 @@ function SettingsContent() {
 
       {activeSection === 'appearance' && (
         <div className="space-y-6 rounded-xl border border-border bg-panel p-6">
+          <div>
+            <h2 className="text-lg font-semibold text-text-primary mb-2">AI Assist (Meta AI)</h2>
+            <p className="text-text-muted text-sm mb-2">Cloudflare Worker URL for post rewrite, screenshot analysis, and chatbot. Leave empty to use build-time env.</p>
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={aiWorkerUrl}
+                onChange={(e) => { setAiWorkerUrl(e.target.value); setAiUrlSaved(false); }}
+                placeholder="https://your-worker.workers.dev"
+                className="flex-1 px-4 py-2 rounded-lg bg-bg border border-border text-text-primary"
+              />
+              <button
+                type="button"
+                onClick={() => { setWorkerUrl(aiWorkerUrl); setAiUrlSaved(true); }}
+                className="px-4 py-2 rounded-lg bg-accent text-white font-medium hover:opacity-90"
+              >
+                Save
+              </button>
+            </div>
+            {aiUrlSaved && <p className="text-green-500 text-sm mt-1">Saved. AI assist will use this URL.</p>}
+            {getWorkerUrl() && <p className="text-text-muted text-xs mt-1">Currently configured.</p>}
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-text-primary mb-2">Color scheme</h2>
+            <p className="text-text-muted text-sm mb-2">Accent color for buttons, links, and highlights.</p>
+            <div className="flex gap-2 flex-wrap">
+              {(['red', 'blue', 'green', 'purple', 'orange'] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setColorScheme(s)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition ${
+                    colorScheme === s ? 'ring-2 ring-offset-2 ring-offset-panel' : 'opacity-80 hover:opacity-100'
+                  }`}
+                  style={{
+                    backgroundColor: s === 'red' ? '#E10600' : s === 'blue' ? '#3B82F6' : s === 'green' ? '#22c55e' : s === 'purple' ? '#A855F7' : '#F97316',
+                    color: 'white',
+                    ringColor: colorScheme === s ? (s === 'red' ? '#E10600' : s === 'blue' ? '#3B82F6' : s === 'green' ? '#22c55e' : s === 'purple' ? '#A855F7' : '#F97316') : undefined,
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
           <div>
             <h2 className="text-lg font-semibold text-text-primary mb-2">Theme</h2>
             <div className="flex gap-2">

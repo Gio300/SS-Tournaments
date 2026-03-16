@@ -50,6 +50,8 @@ function CreateMatchContent() {
         description: description.trim() || null,
         reel_ids: selectedReelIds,
         live_stream_url: liveStreamUrl.trim() || null,
+        scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
+        status: 'open',
       })
       .select('id')
       .single()
