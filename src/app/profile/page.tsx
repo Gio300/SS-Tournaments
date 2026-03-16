@@ -151,7 +151,21 @@ function ProfileContent() {
       .from('profiles')
       .update({ avatar_url: urlData.publicUrl, updated_at: new Date().toISOString() })
       .eq('id', user.id)
+    const { data: postData } = await supabase
+      .from('posts')
+      .insert({ user_id: user.id, body: 'Updated their profile picture', updated_at: new Date().toISOString() })
+      .select('id')
+      .single()
+    if (postData) {
+      await supabase.from('post_attachments').insert({
+        post_id: postData.id,
+        type: 'image',
+        url_or_id: urlData.publicUrl,
+        sort_order: 0,
+      })
+    }
     await refreshProfile?.()
+    setRefreshKey((k) => k + 1)
     setUploadingAvatar(false)
     e.target.value = ''
   }
@@ -275,7 +289,9 @@ function ProfileContent() {
             ) : (
               <>
                 <h1 className="font-display text-xl font-bold text-text-primary">{username}</h1>
+                <p className="text-accent text-sm mt-1">Power level: {profile?.power_level ?? 0} pts</p>
                 {gameTag && <p className="text-text-muted text-sm mt-1">In-game: {gameTag}</p>}
+                {status && <p className="text-text-muted mt-2 italic">&quot;{status}&quot;</p>}
                 {bio && <p className="text-text-muted mt-2">{bio}</p>}
                 <button
                   onClick={() => setEditing(true)}
