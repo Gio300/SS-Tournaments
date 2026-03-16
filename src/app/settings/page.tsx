@@ -36,6 +36,8 @@ function SettingsContent() {
   const [usernameCheck, setUsernameCheck] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
+  const [savingAppearance, setSavingAppearance] = useState(false);
+  const [appearanceSaved, setAppearanceSaved] = useState(false);
   const [chatMessages, setChatMessages] = useState<BotMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
@@ -48,18 +50,27 @@ function SettingsContent() {
   }, [profile, user]);
 
   useEffect(() => {
+    setAppearanceSaved(false);
+  }, [theme, colorScheme, textScale]);
+
+  useEffect(() => {
     const stored = getStoredWorkerUrl();
     const env = process.env.NEXT_PUBLIC_CF_WORKER_URL;
     setAiWorkerUrl(stored || env || '');
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem('smashhub-text-scale');
-    if (stored) {
-      const n = parseFloat(stored);
-      if (TEXT_SCALES.includes(n)) setTextScale(n);
+    const prefs = profile?.theme_prefs as { textScale?: number } | null | undefined;
+    if (prefs?.textScale != null && TEXT_SCALES.includes(prefs.textScale)) {
+      setTextScale(prefs.textScale);
+    } else {
+      const stored = localStorage.getItem('smashhub-text-scale');
+      if (stored) {
+        const n = parseFloat(stored);
+        if (TEXT_SCALES.includes(n)) setTextScale(n);
+      }
     }
-  }, []);
+  }, [profile?.theme_prefs]);
 
   useEffect(() => {
     document.documentElement.style.fontSize = `${textScale * 100}%`;
@@ -82,6 +93,28 @@ function SettingsContent() {
     setUsernameCheck('checking');
     const { data } = await supabase.from('profiles').select('id').eq('username', name.trim()).maybeSingle();
     setUsernameCheck(data ? 'taken' : 'available');
+  }
+
+  async function handleSaveAppearance() {
+    if (!user) return;
+    setSavingAppearance(true);
+    setAppearanceSaved(false);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          theme_prefs: { theme, colorScheme, textScale },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+      if (error) throw error;
+      await refreshProfile();
+      setAppearanceSaved(true);
+    } catch (e: unknown) {
+      setSaveMsg(e instanceof Error ? e.message : 'Failed to save appearance');
+    } finally {
+      setSavingAppearance(false);
+    }
   }
 
   async function handleSaveAccount() {
@@ -266,6 +299,19 @@ function SettingsContent() {
               </div>
             </div>
           </div>
+          {user && (
+            <div className="pt-4 border-t border-border">
+              <button
+                type="button"
+                onClick={handleSaveAppearance}
+                disabled={savingAppearance}
+                className="px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90 disabled:opacity-50"
+              >
+                {savingAppearance ? 'Saving...' : 'Save appearance'}
+              </button>
+              {appearanceSaved && <p className="text-green-500 text-sm mt-2">Appearance saved. Settings will sync across your devices.</p>}
+            </div>
+          )}
         </div>
       )}
 

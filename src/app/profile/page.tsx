@@ -397,7 +397,7 @@ function ProfileContent() {
                 <Link href={`/profile/${item.data.user_id}/`} className="text-accent hover:underline">
                   {item.data.profiles?.username ?? 'Unknown'}
                 </Link>
-                {' · PL '}{(item.data.profiles as { power_level?: number })?.power_level ?? 0}
+                {' · Power level '}{(item.data.profiles as { power_level?: number })?.power_level ?? 0}
                 {' · '}{item.data.clip_ids?.length ?? 0} clips
               </p>
             </Link>
@@ -407,6 +407,7 @@ function ProfileContent() {
               post={item.data}
               onVote={handlePollVote}
               currentUserId={user?.id}
+              onRefresh={() => setRefreshKey((k) => k + 1)}
             />
           )
         )}

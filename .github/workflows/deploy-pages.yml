@@ -34,12 +34,18 @@ jobs:
         env:
           NODE_ENV: production
           GITHUB_REPO: ${{ github.event.repository.name }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_CF_WORKER_URL: ${{ secrets.NEXT_PUBLIC_CF_WORKER_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' && secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder' }}
+          NEXT_PUBLIC_CF_WORKER_URL: ${{ secrets.NEXT_PUBLIC_CF_WORKER_URL || '' }}
 
       - name: SPA 404 fallback for dynamic routes (profile/[userId], etc.)
-        run: cp out/index.html out/404.html
+        run: |
+          if [ -f out/index.html ]; then
+            cp out/index.html out/404.html
+          else
+            echo "::error::Build did not produce out/index.html"
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

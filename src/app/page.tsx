@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Trophy, Swords, Users, User, Settings, Film, Radio, BookOpen } from 'lucide-react';
+import { Trophy, Swords, Users, User, Settings, Film, Radio, Award } from 'lucide-react';
 import { AdSlot } from '@/components/AdSlot';
 import { HeroBg } from '@/components/HeroBg';
 
@@ -80,19 +80,6 @@ export default function HomePage() {
           <div>
             <h2 className="font-semibold text-text-primary mb-1">Settings</h2>
             <p className="text-text-muted text-sm">Theme, account, FAQ, and chatbot</p>
-          </div>
-        </Link>
-
-        <Link
-          href="/tournaments/"
-          className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
-        >
-          <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
-            <BookOpen className="text-accent" size={24} />
-          </div>
-          <div>
-            <h2 className="font-semibold text-text-primary mb-1">Tournaments</h2>
-            <p className="text-text-muted text-sm">Create custom tournaments with your own rules</p>
           </div>
         </Link>
 

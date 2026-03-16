@@ -11,23 +11,18 @@ import { NavSearchBar } from '@/components/NavSearchBar';
 
 const primaryLinks = [
   { href: '/', label: 'Home' },
-  { href: '/rankings/', label: 'Rankings' },
-  { href: '/matches/', label: 'Matches' },
+  { href: '/play/', label: 'Play' },
   { href: '/boards/', label: 'Clans' },
   { href: '/profile/', label: 'Profile' },
   { href: '/settings/', label: 'Settings' },
 ];
 
-const moreLinks = [
-  { href: '/live/', label: 'Live' },
-  { href: '/tournaments/', label: 'Tournaments' },
-  { href: '/reels/', label: 'Reels' },
-  { href: '/stat-check/', label: 'Stat Check' },
-  { href: '/submit-result/', label: 'Submit Result' },
-  { href: '/community/', label: 'Community' },
-  { href: '/search/', label: 'Search' },
-  { href: '/following/', label: 'Following' },
+const moreGroups = [
+  { label: 'Watch', links: [{ href: '/live/', label: 'Live' }, { href: '/reels/', label: 'Reels' }] },
+  { label: 'Compete', links: [{ href: '/stat-check/', label: 'Stat Check' }, { href: '/submit-result/', label: 'Submit Result' }] },
+  { label: 'Discover', links: [{ href: '/search/', label: 'Search' }, { href: '/following/', label: 'Following' }, { href: '/community/', label: 'Community' }] },
 ];
+const moreLinks = moreGroups.flatMap((g) => g.links);
 
 export function Nav() {
   const pathname = usePathname();
@@ -120,22 +115,29 @@ export function Nav() {
               <ChevronDown size={14} className={moreOpen ? 'rotate-180' : ''} />
             </button>
             {moreOpen && (
-              <div className="absolute top-full left-0 mt-1 py-2 min-w-[160px] rounded-lg bg-panel border border-border shadow-lg z-50">
-                {moreLinks.map(({ href, label }) => {
-                  const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => { setMoreOpen(false); setOpen(false); }}
-                      className={`block px-4 py-2 text-sm font-medium transition ${
-                        active ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-text-primary hover:bg-white/5'
-                      }`}
-                    >
-                      {label}
-                    </Link>
-                  );
-                })}
+              <div className="absolute top-full left-0 mt-1 py-2 min-w-[180px] rounded-lg bg-panel border border-border shadow-lg z-50">
+                {moreGroups.map((group) => (
+                  <div key={group.label}>
+                    <p className="px-4 py-1.5 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                      {group.label}
+                    </p>
+                    {group.links.map(({ href, label }) => {
+                      const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          onClick={() => { setMoreOpen(false); setOpen(false); }}
+                          className={`block px-4 py-2 text-sm font-medium transition ${
+                            active ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-text-primary hover:bg-white/5'
+                          }`}
+                        >
+                          {label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             )}
           </li>

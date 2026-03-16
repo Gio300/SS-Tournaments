@@ -11,6 +11,7 @@ export interface Profile {
   country?: string | null
   dashboard_override?: Json | null
   game_tag?: string | null
+  theme_prefs?: { theme?: string; colorScheme?: string; textScale?: number } | null
   created_at: string
   updated_at: string
 }
@@ -161,6 +162,8 @@ export interface Post {
   body: string
   created_at: string
   updated_at: string
+  shareable?: boolean
+  repost_of_id?: string | null
 }
 
 export interface PostAttachment {
@@ -192,6 +195,24 @@ export interface PostPollVote {
   id: string
   option_id: string
   user_id: string
+  created_at: string
+}
+
+export type PostReactionEmoji = 'like' | 'love' | 'haha' | 'wow' | 'sad' | 'angry'
+
+export interface PostReaction {
+  id: string
+  post_id: string
+  user_id: string
+  emoji: PostReactionEmoji
+  created_at: string
+}
+
+export interface PostComment {
+  id: string
+  post_id: string
+  user_id: string
+  body: string
   created_at: string
 }
 

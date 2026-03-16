@@ -4,6 +4,7 @@ import { Inter, Orbitron } from 'next/font/google';
 import './globals.css';
 import { Nav } from '@/components/Nav';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeSync } from '@/components/ThemeSync';
 import { ThemeAwareBackground } from '@/components/ThemeAwareBackground';
 import { Footer } from '@/components/Footer';
 import { RulesBotFab } from '@/components/RulesBotFab';
@@ -38,6 +39,7 @@ export default function RootLayout({
       )}
       <body className="font-sans antialiased min-h-screen flex flex-col relative">
         <ThemeProvider>
+          <ThemeSync />
           <ThemeAwareBackground />
           <PwaRegister />
           <Nav />
