@@ -15,6 +15,8 @@ const primaryLinks = [
 ];
 
 const moreLinks = [
+  { href: '/rankings/', label: 'Rankings' },
+  { href: '/stat-check/', label: 'Stat Check' },
   { href: '/rules/', label: 'Rules' },
   { href: '/faq/', label: 'FAQ' },
   { href: '/community/', label: 'Community' },
@@ -48,8 +50,8 @@ export function Nav() {
     <header className="sticky top-0 z-50 bg-panel/95 backdrop-blur border-b border-border">
       <nav className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
         <Link href="/" className="font-display font-bold text-lg transition flex items-center gap-0.5">
-          <span className={theme === 'light' ? 'text-red-600 hover:text-red-700' : 'text-accent hover:text-accent/90'}>Smash</span>
-          <span className={theme === 'light' ? 'text-green-600 hover:text-green-700' : 'text-accent hover:text-accent/90'}>Hub</span>
+          <span className="text-red-600 hover:text-red-700">Smash</span>
+          <span className="text-green-600 hover:text-green-700">Hub</span>
         </Link>
 
         <div className="flex items-center gap-1">

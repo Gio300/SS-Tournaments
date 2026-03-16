@@ -47,7 +47,7 @@ export default function ReelsPage() {
             href={`/reels/${reel.id}/`}
             className="group rounded-xl border border-border bg-panel overflow-hidden hover:border-accent/50 transition"
           >
-            <div className="aspect-video bg-[#0B0E14] flex items-center justify-center">
+            <div className="aspect-video bg-panel flex items-center justify-center">
               {reel.thumbnail ? (
                 <img src={reel.thumbnail} alt="" className="w-full h-full object-cover" />
               ) : (

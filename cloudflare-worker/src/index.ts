@@ -15,6 +15,8 @@ interface RequestBody {
   action?: string;
   body?: string;
   pollQuestion?: string;
+  imageBase64?: string;
+  matchType?: string;
 }
 
 const corsHeaders = {
@@ -28,6 +30,7 @@ export default {
     const url = new URL(request.url);
     const isDirector = url.pathname.endsWith('/director');
     const isAssist = url.pathname.endsWith('/assist');
+    const isScreenshotAnalyze = url.pathname.endsWith('/screenshot-analyze');
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders });
@@ -46,6 +49,10 @@ export default {
 
     if (isAssist) {
       return handleAssist(request, env);
+    }
+
+    if (isScreenshotAnalyze) {
+      return handleScreenshotAnalyze(request, env);
     }
 
     return handleRulesBot(request, env);
@@ -196,6 +203,80 @@ async function handleAssist(request: Request, env: Env): Promise<Response> {
     console.error('Assist error:', error);
     return new Response(
       JSON.stringify({ error: 'Assist failed', details: error?.message }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  }
+}
+
+async function handleScreenshotAnalyze(request: Request, env: Env): Promise<Response> {
+  try {
+    const body: RequestBody = await request.json();
+    const { imageBase64, matchType } = body;
+
+    if (!imageBase64) {
+      return new Response(
+        JSON.stringify({ error: 'Missing imageBase64' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    const imgUrl = imageBase64.startsWith('data:') ? imageBase64 : `data:image/png;base64,${imageBase64}`;
+    const mt = matchType || 'quick_match';
+
+    const prompt = `This is a Shinobi Strikers (Naruto game) end-of-match screenshot. Match type: ${mt}.
+
+Extract the following and reply with ONLY a JSON object (no other text):
+- winnerName: the winning player's display name (or team name if team match)
+- loserNames: array of losing player names (or empty array for 1v1 survival)
+- redTeam: array of player names on red team (if team match, else null)
+- whiteTeam: array of player names on white team (if team match, else null)
+- scores: object with red and white scores if visible, e.g. {"red": 3, "white": 1}, else null
+
+Example: {"winnerName":"Player1","loserNames":["Player2"],"redTeam":null,"whiteTeam":null,"scores":null}`;
+
+    const content: Array<{ type: string; text?: string; image_url?: { url: string } }> = [
+      { type: 'text', text: prompt },
+      { type: 'image_url', image_url: { url: imgUrl } },
+    ];
+
+    const aiResponse = await env.AI.run('@cf/meta/llama-3.2-11b-vision-instruct', {
+      messages: [{ role: 'user', content }],
+      max_tokens: 300,
+      temperature: 0.2,
+    });
+
+    let answer = '';
+    if (typeof aiResponse === 'string') answer = aiResponse;
+    else if (aiResponse?.response) {
+      const r = aiResponse.response;
+      answer = typeof r === 'string' ? r : r?.content ?? (Array.isArray(r) ? r[0]?.content ?? '' : '');
+    } else if (aiResponse?.text) answer = aiResponse.text;
+
+    const jsonMatch = answer.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return new Response(JSON.stringify(parsed), {
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      } catch (_) {}
+    }
+
+    return new Response(
+      JSON.stringify({
+        winnerName: null,
+        loserNames: [],
+        redTeam: null,
+        whiteTeam: null,
+        scores: null,
+        raw: answer.substring(0, 500),
+      }),
+      { headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  } catch (error: any) {
+    console.error('Screenshot analyze error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Screenshot analyze failed', details: error?.message }),
       { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   }

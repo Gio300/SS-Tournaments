@@ -168,7 +168,14 @@ export function PostComposer({ onPosted }: { onPosted?: () => void }) {
       setPollEndsAt('');
       onPosted?.();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to post');
+      const msg =
+        (err as { message?: string })?.message ??
+        (err instanceof Error ? err.message : 'Failed to post');
+      const errStr = JSON.stringify(err ?? '') + msg;
+      const hint = /does not exist|relation.*posts|42P01|406|404|post-images/.test(errStr)
+        ? ' Run supabase/posts_schema.sql in your Supabase SQL Editor.'
+        : '';
+      setError(msg + hint);
     } finally {
       setSending(false);
     }

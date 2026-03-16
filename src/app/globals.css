@@ -29,6 +29,12 @@
   --text-primary: #000000;
   --text-muted: #666666;
   --border: #e0e0e0;
+  /* Tailwind @theme variables - ensure panels/inputs use light colors */
+  --color-bg: #ffffff;
+  --color-panel: #f5f5f5;
+  --color-text-primary: #000000;
+  --color-text-muted: #666666;
+  --color-border: #e0e0e0;
 }
 
 /* Light mode: white background, black text; logo stays red/green via Nav component */

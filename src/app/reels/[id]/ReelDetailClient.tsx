@@ -45,7 +45,7 @@ export function ReelDetailClient() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       <div className="rounded-xl border border-border bg-panel overflow-hidden">
-        <div className="aspect-video bg-[#0B0E14]">
+        <div className="aspect-video bg-panel">
           {reel.combined_video_url ? (
             <video src={reel.combined_video_url} controls className="w-full h-full" />
           ) : youtubeClips.length > 0 ? (

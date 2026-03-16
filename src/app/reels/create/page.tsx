@@ -41,7 +41,7 @@ function ProcessingPip({
             </button>
           )}
         </div>
-        <div className="h-2 rounded-full bg-[#0B0E14] overflow-hidden mb-2">
+        <div className="h-2 rounded-full bg-bg overflow-hidden mb-2">
           <div
             className="h-full bg-accent transition-all duration-300"
             style={{ width: `${progress}%` }}
@@ -52,7 +52,7 @@ function ProcessingPip({
           {PROGRESS_STEPS.map((s, i) => (
             <div
               key={s}
-              className={`h-1 flex-1 rounded ${i <= stepIndex ? 'bg-accent' : 'bg-[#0B0E14]'}`}
+              className={`h-1 flex-1 rounded ${i <= stepIndex ? 'bg-accent' : 'bg-bg'}`}
               title={s}
             />
           ))}

@@ -10,9 +10,9 @@ import { PostComposer } from '@/components/PostComposer'
 import { PostCard } from '@/components/PostCard'
 import type { Reel, UserYoutubeLink, Post, PostAttachment, PostPoll, PostPollOption } from '@/types/database'
 
-type ReelWithProfile = Reel & { profiles?: { username: string } }
+type ReelWithProfile = Reel & { profiles?: { username: string; power_level?: number } }
 type PostWithExtras = Post & {
-  profiles?: { username: string; avatar_url: string | null }
+  profiles?: { username: string; avatar_url: string | null; power_level?: number }
   post_attachments?: (PostAttachment & { reels?: { id: string; title: string; thumbnail: string | null } })[]
   post_polls?: (PostPoll & { post_poll_options?: (PostPollOption & { vote_count?: number; user_voted?: boolean })[] })[]
 }
@@ -62,10 +62,10 @@ function ProfileContent() {
       })()
 
       const [reelsRes, postsRes] = await Promise.all([
-        supabase.from('reels').select('*, profiles(username)').in('user_id', ids).order('created_at', { ascending: false }),
+        supabase.from('reels').select('*, profiles(username, power_level)').in('user_id', ids).order('created_at', { ascending: false }),
         supabase.from('posts').select(`
           *,
-          profiles(username, avatar_url),
+          profiles(username, avatar_url, power_level),
           post_attachments(*),
           post_polls(
             *,
@@ -75,7 +75,7 @@ function ProfileContent() {
       ])
 
       const reels = (reelsRes.data ?? []) as ReelWithProfile[]
-      const posts = (postsRes.data ?? []) as PostWithExtras[]
+      const posts = postsRes.error ? [] : ((postsRes.data ?? []) as PostWithExtras[])
 
       const reelIds = new Set<string>()
       for (const p of posts) {
@@ -224,13 +224,13 @@ function ProfileContent() {
                 <input
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg bg-[#0B0E14] border border-border text-text-primary mb-2"
+                  className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary mb-2"
                   placeholder="Username"
                 />
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg bg-[#0B0E14] border border-border text-text-primary mb-2 resize-none"
+                  className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary mb-2 resize-none"
                   placeholder="Bio"
                   rows={3}
                 />
@@ -336,6 +336,9 @@ function ProfileContent() {
                 <Link href={`/profile/${item.data.user_id}`} className="text-accent hover:underline">
                   {item.data.profiles?.username ?? 'Unknown'}
                 </Link>
+                {(item.data.profiles as { power_level?: number })?.power_level != null && (
+                  <> · PL {(item.data.profiles as { power_level?: number }).power_level}</>
+                )}
                 {' · '}{item.data.clip_ids?.length ?? 0} clips
               </p>
             </Link>
