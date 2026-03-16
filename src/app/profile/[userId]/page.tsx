@@ -14,7 +14,7 @@ export default function ProfileViewPage() {
   const router = useRouter()
   const userId = params.userId as string
   const { user } = useAuth()
-  const [profile, setProfile] = useState<{ id: string; username: string; avatar_url: string | null; bio: string | null } | null>(null)
+  const [profile, setProfile] = useState<{ id: string; username: string; avatar_url: string | null; bio: string | null; status: string | null; power_level: number | null } | null>(null)
   const [reels, setReels] = useState<ReelWithProfile[]>([])
 
   useEffect(() => {
@@ -59,6 +59,8 @@ export default function ProfileViewPage() {
           )}
           <div className="flex-1">
             <h1 className="font-display text-xl font-bold text-text-primary">{profile.username}</h1>
+            <p className="text-accent text-sm mt-1">Power level: {profile.power_level ?? 0} pts</p>
+            {profile.status && <p className="text-text-muted mt-2 italic">&quot;{profile.status}&quot;</p>}
             {profile.bio && <p className="text-text-muted mt-2">{profile.bio}</p>}
           </div>
         </div>

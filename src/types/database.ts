@@ -5,6 +5,7 @@ export interface Profile {
   username: string
   avatar_url: string | null
   bio: string | null
+  status?: string | null
   social_links: Json | null
   power_level?: number
   country?: string | null

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { Post, PostAttachment, PostPoll, PostPollOption } from '@/types/database'
 
 type PostWithExtras = Post & {
-  profiles?: { username: string; avatar_url: string | null };
+  profiles?: { username: string; avatar_url: string | null; power_level?: number };
   post_attachments?: (PostAttachment & { reels?: { id: string; title: string; thumbnail: string | null } })[];
   post_polls?: (PostPoll & { post_poll_options?: (PostPollOption & { vote_count?: number; user_voted?: boolean })[] })[];
 };
@@ -54,6 +54,7 @@ export function PostCard({
           <Link href={`/profile/${post.user_id}/`} className="font-medium text-accent hover:underline">
             {post.profiles?.username ?? 'Unknown'}
           </Link>
+          <span className="text-accent text-sm ml-2">PL {post.profiles?.power_level ?? 0}</span>
           <span className="text-text-muted text-sm ml-2">
             {new Date(post.created_at).toLocaleString()}
           </span>

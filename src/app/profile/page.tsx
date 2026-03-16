@@ -31,12 +31,14 @@ function ProfileContent() {
   const [editing, setEditing] = useState(false)
   const [username, setUsername] = useState('')
   const [bio, setBio] = useState('')
+  const [status, setStatus] = useState('')
   const [gameTag, setGameTag] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
 
   useEffect(() => {
     setUsername(profile?.username ?? '')
     setBio(profile?.bio ?? '')
+    setStatus(profile?.status ?? '')
     setGameTag(profile?.game_tag ?? '')
   }, [profile])
 
@@ -173,7 +175,17 @@ function ProfileContent() {
 
   async function handleSave() {
     if (!user) return
-    await supabase.from('profiles').update({ username, bio, updated_at: new Date().toISOString() }).eq('id', user.id)
+    await supabase
+      .from('profiles')
+      .update({
+        username,
+        bio,
+        status: status.trim() || null,
+        game_tag: gameTag.trim() || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', user.id)
+    await refreshProfile?.()
     setEditing(false)
   }
 
@@ -243,6 +255,14 @@ function ProfileContent() {
                   placeholder="Bio"
                   rows={3}
                 />
+                <input
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value.slice(0, 60))}
+                  className="w-full px-4 py-2 rounded-lg bg-panel border border-border text-text-primary mb-2"
+                  placeholder="What are you thinking? (max 60 chars)"
+                  maxLength={60}
+                />
+                <p className="text-xs text-text-muted mb-2">{status.length}/60</p>
                 <div className="flex gap-2">
                   <button onClick={handleSave} className="px-4 py-2 rounded-lg bg-accent text-white font-semibold">
                     Save
@@ -346,9 +366,7 @@ function ProfileContent() {
                 <Link href={`/profile/${item.data.user_id}/`} className="text-accent hover:underline">
                   {item.data.profiles?.username ?? 'Unknown'}
                 </Link>
-                {(item.data.profiles as { power_level?: number })?.power_level != null && (
-                  <> · PL {(item.data.profiles as { power_level?: number }).power_level}</>
-                )}
+                {' · PL '}{(item.data.profiles as { power_level?: number })?.power_level ?? 0}
                 {' · '}{item.data.clip_ids?.length ?? 0} clips
               </p>
             </Link>
