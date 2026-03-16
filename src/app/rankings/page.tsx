@@ -42,7 +42,7 @@ export default function RankingsPage() {
         setLoading(false);
         return;
       }
-      const ids = [...new Set(data.map((r) => r.profile_id))];
+      const ids = Array.from(new Set(data.map((r) => r.profile_id)));
       const { data: profiles } = await supabase
         .from('profiles')
         .select('id, username, avatar_url')
