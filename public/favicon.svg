@@ -1,5 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="btnGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="100%" style="stop-color:#7f1d1d"/>
+    </linearGradient>
+  </defs>
   <rect width="32" height="32" rx="6" fill="#0B0E14"/>
-  <circle cx="16" cy="16" r="8" fill="#E10600" opacity="0.9"/>
-  <text x="16" y="20" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="#F5F7FA" text-anchor="middle">S</text>
+  <!-- Arcade button -->
+  <circle cx="16" cy="18" r="9" fill="url(#btnGrad)" stroke="#2A2F45" stroke-width="1"/>
+  <!-- Finger pad mashing the button -->
+  <ellipse cx="16" cy="13" rx="5" ry="5" fill="#F5F7FA"/>
 </svg>
