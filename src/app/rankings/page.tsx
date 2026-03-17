@@ -141,8 +141,8 @@ export default function RankingsPage() {
       for (const t of trophiesRes.data ?? []) {
         trophyCounts.set(t.profile_id, (trophyCounts.get(t.profile_id) ?? 0) + 1);
       }
-      const winSorted = [...winCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
-      const trophySorted = [...trophyCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+      const winSorted = Array.from(winCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10);
+      const trophySorted = Array.from(trophyCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10);
       const winIds = winSorted.map(([id]) => id);
       const trophyIds = trophySorted.map(([id]) => id);
       const { data: winProfiles } = winIds.length ? await supabase.from('profiles').select('id, username, avatar_url').in('id', winIds) : { data: [] };
