@@ -48,7 +48,7 @@ function run(cmd, args, cwd) {
   });
 }
 
-async function downloadWithYtDlp(url, outDir, index) {
+async function downloadWithYtDlp(url, outDir, index, cookiesOverride) {
   const outPath = path.join(outDir, `clip_${index}.mp4`);
   const args = [
     '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
@@ -59,9 +59,9 @@ async function downloadWithYtDlp(url, outDir, index) {
     '--extractor-args', 'youtube:player_client=android',
     url,
   ];
-  // If YOUTUBE_COOKIES env has Netscape-format cookies, use them (most reliable fix)
-  const cookiesEnv = process.env.YOUTUBE_COOKIES;
-  if (cookiesEnv && cookiesEnv.trim()) {
+  // Cookies: request body > env var (user can paste cookies from browser)
+  const cookiesRaw = cookiesOverride || process.env.YOUTUBE_COOKIES;
+  if (cookiesRaw && String(cookiesRaw).trim()) {
     const cookiesPath = path.join(os.tmpdir(), `cookies-${Date.now()}.txt`);
     fs.writeFileSync(cookiesPath, cookiesEnv.trim());
     args.splice(-1, 0, '--cookies', cookiesPath);
@@ -89,7 +89,7 @@ async function concatWithFfmpeg(files, outPath) {
 
 app.post('/combine', async (req, res) => {
   try {
-    const { urls = [], title = '', userId = '' } = req.body;
+    const { urls = [], title = '', userId = '', cookies: reqCookies = '' } = req.body;
     if (!Array.isArray(urls) || urls.length < 2 || urls.length > 8) {
       return res.status(400).json({ error: 'Need 2-8 YouTube URLs' });
     }
@@ -108,8 +108,9 @@ app.post('/combine', async (req, res) => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'combine-'));
     try {
       const files = [];
+      const cookiesToUse = reqCookies && String(reqCookies).trim() ? String(reqCookies).trim() : null;
       for (let i = 0; i < validUrls.length; i++) {
-        const p = await downloadWithYtDlp(validUrls[i], tmpDir, i);
+        const p = await downloadWithYtDlp(validUrls[i], tmpDir, i, cookiesToUse);
         files.push(p);
       }
 

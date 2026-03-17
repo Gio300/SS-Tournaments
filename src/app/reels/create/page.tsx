@@ -80,6 +80,8 @@ function CreateReelContent() {
   const [pipStep, setPipStep] = useState('')
   const [pipProgress, setPipProgress] = useState(0)
   const [showPip, setShowPip] = useState(false)
+  const [youtubeCookies, setYoutubeCookies] = useState('')
+  const [showCookiesHelp, setShowCookiesHelp] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -174,6 +176,7 @@ function CreateReelContent() {
             urls: youtubeClips.map((c) => c.url),
             title: title.trim(),
             userId: user!.id,
+            ...(youtubeCookies.trim() && { cookies: youtubeCookies.trim() }),
           }),
         })
         const data = await res.json()
@@ -286,6 +289,9 @@ function CreateReelContent() {
       setSaving(false)
     }
   }
+
+  const youtubeClips = clips.filter((c): c is ClipInput & { type: 'youtube' } => c.type === 'youtube')
+  const uploadClips = clips.filter((c): c is ClipInput & { type: 'upload' } => c.type === 'upload')
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
@@ -432,6 +438,39 @@ function CreateReelContent() {
         )}
 
         {error && <p className="text-accent text-sm">{error}</p>}
+
+        {youtubeClips.length >= 2 && uploadClips.length === 0 && (
+          <div className="rounded-lg border border-border bg-panel p-4">
+            <button
+              type="button"
+              onClick={() => setShowCookiesHelp((s) => !s)}
+              className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary w-full text-left"
+            >
+              <span>{showCookiesHelp ? '▼' : '▶'}</span>
+              YouTube blocking? Link your account with cookies
+            </button>
+            {showCookiesHelp && (
+              <div className="mt-3 space-y-2 text-sm">
+                <p className="text-text-muted">
+                  If you see &quot;Sign in to confirm you&apos;re not a bot&quot;, sign in to YouTube in another tab, then export cookies and paste below.
+                </p>
+                <ol className="list-decimal list-inside text-text-muted space-y-1">
+                  <li>Sign in to <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">youtube.com</a></li>
+                  <li>Export cookies in Netscape format (<a href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">guide</a>)</li>
+                  <li>Paste the contents below</li>
+                </ol>
+                <textarea
+                  value={youtubeCookies}
+                  onChange={(e) => setYoutubeCookies(e.target.value)}
+                  placeholder="Paste Netscape-format cookies here (optional)"
+                  rows={4}
+                  className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-text-primary text-xs font-mono placeholder:text-text-muted"
+                />
+                <p className="text-xs text-text-muted">Cookies are sent only with this request and are not stored.</p>
+              </div>
+            )}
+          </div>
+        )}
 
         <button
           type="submit"
