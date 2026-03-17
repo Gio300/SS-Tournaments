@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
 import { NavSearchBar } from '@/components/NavSearchBar';
+import { BrandLogo } from '@/components/BrandLogo';
 
 const primaryLinks: { href: string; label: string; activePaths?: string[] }[] = [
   { href: '/', label: 'Home' },
@@ -34,9 +35,8 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 bg-panel/95 backdrop-blur border-b border-border">
       <nav className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
-        <Link href="/" className="font-display font-bold text-lg transition flex items-center gap-0.5 shrink-0">
-          <span className="text-red-600 hover:text-red-700">Smash</span>
-          <span className="text-green-600 hover:text-green-700">Hub</span>
+        <Link href="/" className="transition flex items-center shrink-0 hover:opacity-90">
+          <BrandLogo className="text-lg" />
         </Link>
 
         <div className="hidden sm:block flex-1 max-w-md">
