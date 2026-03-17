@@ -9,7 +9,7 @@ import { AuthGuard } from '@/components/AuthGuard';
 import type { Tournament, StatCheckSubmission, TournamentResult } from '@/types/database';
 
 type SubmissionWithProfile = StatCheckSubmission & { profiles?: { username: string; avatar_url: string | null } };
-type ResultWithProfile = TournamentResult & { winner_profiles?: { username: string; avatar_url: string | null }; tournaments?: { name: string } };
+type ResultWithProfile = TournamentResult & { winner_username?: string; winner_profiles?: { username: string; avatar_url: string | null }; tournaments?: { name: string } };
 
 export function TournamentDetailClient() {
   const params = useParams();
