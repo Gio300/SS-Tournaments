@@ -32,7 +32,7 @@ export function BrandLogo({ className = '', as: Tag = 'span', variant = 'text' }
       <img
         src={src}
         alt="ButtonMasherz"
-        className="w-full max-w-2xl sm:max-w-3xl md:max-w-4xl lg:max-w-5xl object-contain opacity-[0.85]"
+        className="w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl object-contain opacity-[0.85]"
         style={{ mixBlendMode: 'overlay' }}
       />
     </Tag>
