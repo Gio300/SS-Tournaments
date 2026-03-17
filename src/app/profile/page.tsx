@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { extractYouTubeId } from '@/lib/youtube'
 import { useAuth } from '@/hooks/useAuth'
 import { AuthGuard } from '@/components/AuthGuard'
 import { PostComposer } from '@/components/PostComposer'
@@ -186,7 +187,7 @@ function ProfileContent() {
     e.preventDefault()
     if (!user || !newYoutubeUrl.trim()) return
     const url = newYoutubeUrl.trim()
-    if (!/youtube\.com|youtu\.be/.test(url)) return
+    if (!extractYouTubeId(url)) return
     setAddingLink(true)
     const { data } = await supabase.from('user_youtube_links').insert({ user_id: user.id, url }).select().single()
     if (data) setYoutubeLinks((prev) => [data, ...prev])

@@ -5,12 +5,8 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
+import { extractYouTubeId } from '@/lib/youtube';
 import type { LiveGroup } from '@/types/database';
-
-function extractYouTubeId(url: string): string | null {
-  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return m ? m[1] : null;
-}
 
 type GroupWithMembers = LiveGroup & {
   members: { id: string; user_id: string; accepted: boolean; stream_id: string | null; profile?: { username: string } }[];

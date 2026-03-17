@@ -4,11 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Radio } from 'lucide-react';
 import { getWorkerUrl } from '@/lib/workerUrl';
-
-function extractYouTubeId(url: string): string | null {
-  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  return m ? m[1] : null;
-}
+import { extractYouTubeId } from '@/lib/youtube';
 
 const POLL_INTERVAL_MS = 25000;
 

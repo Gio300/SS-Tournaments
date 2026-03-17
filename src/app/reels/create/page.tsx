@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { useFFmpeg } from '@/hooks/useFFmpeg'
 import { AuthGuard } from '@/components/AuthGuard'
+import { extractYouTubeId } from '@/lib/youtube'
 import type { UserYoutubeLink } from '@/types/database'
 
 type ClipInput =
@@ -145,13 +146,48 @@ function CreateReelContent() {
     const uploadClips = clips.filter((c): c is ClipInput & { type: 'upload' } => c.type === 'upload')
     const youtubeClips = clips.filter((c): c is ClipInput & { type: 'youtube' } => c.type === 'youtube')
 
-    if (uploadClips.length > 0 && uploadClips.length < 4) {
-      setError('Need 4–8 uploaded clips to combine. Use YouTube clips only for reference-only reels.')
+    if (uploadClips.length > 0 && uploadClips.length < 2) {
+      setError('Need 2–8 uploaded clips to combine. Use YouTube clips only for reference-only reels.')
       return
     }
     if (uploadClips.length > 8) {
       setError('Maximum 8 upload clips')
       return
+    }
+    if (youtubeClips.length >= 2 && youtubeClips.length <= 8 && uploadClips.length === 0) {
+      const combineUrl = process.env.NEXT_PUBLIC_COMBINE_API_URL
+      if (!combineUrl) {
+        setError('Combine service not configured. Add NEXT_PUBLIC_COMBINE_API_URL to enable YouTube combine, or upload 2–8 video files instead.')
+        return
+      }
+      setSaving(true)
+      setShowPip(true)
+      setPipStep('Downloading clips')
+      setPipProgress(10)
+      try {
+        setPipStep('Combining videos')
+        setPipProgress(30)
+        const res = await fetch(`${combineUrl.replace(/\/$/, '')}/combine`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            urls: youtubeClips.map((c) => c.url),
+            title: title.trim(),
+            userId: user!.id,
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Combine failed')
+        setPipStep('Finalizing')
+        setPipProgress(100)
+        router.push(`/reels/${data.reelId}/`)
+        return
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Combine failed')
+        setShowPip(false)
+        setSaving(false)
+        return
+      }
     }
 
     setSaving(true)
@@ -162,7 +198,7 @@ function CreateReelContent() {
     try {
       let combinedUrl: string | null = null
 
-      if (uploadClips.length >= 4) {
+      if (uploadClips.length >= 2) {
         setPipStep('Combining videos')
         setPipProgress(20)
         const blob = await concatVideos(uploadClips.map((c) => c.file))
@@ -181,7 +217,7 @@ function CreateReelContent() {
       }
 
       setPipStep('Processing clips')
-      setPipProgress(uploadClips.length >= 4 ? 70 : 30)
+      setPipProgress(uploadClips.length >= 2 ? 70 : 30)
       const clipIds: string[] = []
 
       for (const c of youtubeClips) {
@@ -263,7 +299,7 @@ function CreateReelContent() {
 
         <div>
           <label className="block text-sm text-text-muted mb-2">Add YouTube clip (URL)</label>
-          <p className="text-xs text-text-muted mb-2">Paste a URL and add. No need to save to Profile first.</p>
+          <p className="text-xs text-text-muted mb-2">Paste a URL and add. Add 2–8 YouTube clips to combine them into one highlight.</p>
           <div className="flex flex-wrap gap-2 items-center">
             <input
               type="text"
@@ -361,7 +397,7 @@ function CreateReelContent() {
         </div>
 
         <div>
-          <label className="block text-sm text-text-muted mb-2">Or upload clips (4–8 for combining)</label>
+          <label className="block text-sm text-text-muted mb-2">Or upload clips (2–8 for combining)</label>
           <input
             type="file"
             accept="video/*"
@@ -408,11 +444,6 @@ function CreateReelContent() {
       />
     </div>
   )
-}
-
-function extractYouTubeId(url: string): string | null {
-  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)
-  return m ? m[1] : null
 }
 
 export default function CreateReelPage() {
