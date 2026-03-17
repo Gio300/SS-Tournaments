@@ -2,34 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, ChevronDown, Sun, Moon, LogOut } from 'lucide-react';
+import { Menu, X, Sun, Moon, LogOut } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
 import { NavSearchBar } from '@/components/NavSearchBar';
 
-const primaryLinks = [
+const primaryLinks: { href: string; label: string; activePaths?: string[] }[] = [
   { href: '/', label: 'Home' },
-  { href: '/play/', label: 'Play' },
-  { href: '/boards/', label: 'Clans' },
+  { href: '/play/', label: 'Play', activePaths: ['/play/', '/tournaments/', '/matches/'] },
+  { href: '/view/', label: 'View', activePaths: ['/view/', '/rankings/', '/live/', '/reels/', '/following/', '/community/', '/search/'] },
+  { href: '/boards/', label: 'Clan' },
   { href: '/profile/', label: 'Profile' },
   { href: '/settings/', label: 'Settings' },
 ];
-
-const moreGroups = [
-  { label: 'Watch', links: [{ href: '/live/', label: 'Live' }, { href: '/reels/', label: 'Reels' }] },
-  { label: 'Compete', links: [{ href: '/stat-check/', label: 'Stat Check' }, { href: '/submit-result/', label: 'Submit Result' }] },
-  { label: 'Discover', links: [{ href: '/search/', label: 'Search' }, { href: '/following/', label: 'Following' }, { href: '/community/', label: 'Community' }] },
-];
-const moreLinks = moreGroups.flatMap((g) => g.links);
 
 export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const moreRef = useRef<HTMLLIElement>(null);
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
@@ -38,18 +30,6 @@ export function Nav() {
     setOpen(false);
     router.push('/');
   }
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const isMoreActive = moreLinks.some(
-    (l) => pathname === l.href || (l.href !== '/' && pathname?.startsWith(l.href))
-  );
 
   return (
     <header className="sticky top-0 z-50 bg-panel/95 backdrop-blur border-b border-border">
@@ -87,8 +67,13 @@ export function Nav() {
             open ? 'block' : 'hidden'
           }`}
         >
-          {primaryLinks.map(({ href, label }) => {
-            const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
+          {primaryLinks.map((link) => {
+            const href = link.href;
+            const label = link.label;
+            const activePaths = 'activePaths' in link ? link.activePaths : undefined;
+            const active = activePaths
+              ? activePaths.some((p) => pathname === p || (p !== '/' && pathname?.startsWith(p)))
+              : (pathname === href || (href !== '/' && pathname?.startsWith(href)));
             return (
               <li key={href}>
                 <Link
@@ -103,44 +88,6 @@ export function Nav() {
               </li>
             );
           })}
-          <li className="relative" ref={moreRef}>
-            <button
-              type="button"
-              onClick={() => setMoreOpen((o) => !o)}
-              className={`flex items-center gap-1 w-full sm:w-auto px-4 py-3 sm:py-2 sm:px-3 rounded text-sm font-medium transition ${
-                isMoreActive ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-text-primary hover:bg-white/5'
-              }`}
-            >
-              More
-              <ChevronDown size={14} className={moreOpen ? 'rotate-180' : ''} />
-            </button>
-            {moreOpen && (
-              <div className="absolute top-full left-0 mt-1 py-2 min-w-[180px] rounded-lg bg-panel border border-border shadow-lg z-50">
-                {moreGroups.map((group) => (
-                  <div key={group.label}>
-                    <p className="px-4 py-1.5 text-xs font-semibold text-text-muted uppercase tracking-wider">
-                      {group.label}
-                    </p>
-                    {group.links.map(({ href, label }) => {
-                      const active = pathname === href || (href !== '/' && pathname?.startsWith(href));
-                      return (
-                        <Link
-                          key={href}
-                          href={href}
-                          onClick={() => { setMoreOpen(false); setOpen(false); }}
-                          className={`block px-4 py-2 text-sm font-medium transition ${
-                            active ? 'text-accent bg-accent/10' : 'text-text-muted hover:text-text-primary hover:bg-white/5'
-                          }`}
-                        >
-                          {label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            )}
-          </li>
           {user ? (
             <li>
               <button

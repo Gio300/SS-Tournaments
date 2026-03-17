@@ -233,7 +233,34 @@ function ProfileContent() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <aside className="lg:w-56 shrink-0 order-2 lg:order-1">
+          <div className="rounded-xl border border-border bg-panel p-4 sticky top-24">
+            <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">Quick links</h3>
+            <nav className="space-y-1">
+              <Link href="/play/" className="block px-3 py-2 rounded-lg text-sm text-text-muted hover:text-accent hover:bg-accent/10 transition">
+                Play
+              </Link>
+              <Link href="/view/" className="block px-3 py-2 rounded-lg text-sm text-text-muted hover:text-accent hover:bg-accent/10 transition">
+                View
+              </Link>
+              <Link href="/boards/" className="block px-3 py-2 rounded-lg text-sm text-text-muted hover:text-accent hover:bg-accent/10 transition">
+                Clan
+              </Link>
+              <Link href="/submit-result/" className="block px-3 py-2 rounded-lg text-sm text-text-muted hover:text-accent hover:bg-accent/10 transition">
+                Submit Result
+              </Link>
+              <Link href="/rankings/" className="block px-3 py-2 rounded-lg text-sm text-text-muted hover:text-accent hover:bg-accent/10 transition">
+                Rankings
+              </Link>
+              <Link href="/settings/" className="block px-3 py-2 rounded-lg text-sm text-text-muted hover:text-accent hover:bg-accent/10 transition">
+                Settings
+              </Link>
+            </nav>
+          </div>
+        </aside>
+        <div className="flex-1 min-w-0 order-1 lg:order-2">
       <div className="rounded-xl border border-border bg-panel p-6 mb-8">
         <div className="flex items-start gap-6">
           <div className="relative group">
@@ -301,9 +328,10 @@ function ProfileContent() {
             ) : (
               <>
                 <h1 className="font-display text-xl font-bold text-text-primary">{username}</h1>
-                <p className="text-accent text-sm mt-1 flex items-center">
+                <p className="text-accent text-sm mt-1 flex items-center gap-2">
                   Power level: {profile?.power_level ?? 0} pts
                   <TrophyBadges trophyTypes={trophyTypes} />
+                  {user && <Link href={`/profile/${user.id}/trophies/`} className="text-accent hover:underline text-sm">Trophies earned</Link>}
                 </p>
                 {gameTag && <p className="text-text-muted text-sm mt-1">In-game: {gameTag}</p>}
                 {status && <p className="text-text-muted mt-2 italic">&quot;{status}&quot;</p>}
@@ -417,6 +445,8 @@ function ProfileContent() {
           {wallMode === 'my' ? 'No posts yet. Create a post or highlight!' : 'No activity yet. Follow others to see their posts.'}
         </p>
       )}
+        </div>
+      </div>
     </div>
   )
 }

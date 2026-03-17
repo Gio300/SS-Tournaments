@@ -42,10 +42,15 @@ type ClanRow = {
 };
 
 export default function RankingsPage() {
-  const [tab, setTab] = useState<'players' | 'clans'>('players');
+  const [tab, setTab] = useState<'players' | 'clans' | 'hallOfFame'>('players');
   const [filter, setFilter] = useState<MatchType>('quick_match');
   const [rows, setRows] = useState<RankingRow[]>([]);
   const [clanRows, setClanRows] = useState<ClanRow[]>([]);
+  const [hallOfFame, setHallOfFame] = useState<{
+    mostTournamentWins: { profile_id: string; username: string; avatar_url: string | null; wins: number }[];
+    highestPower: { profile_id: string; username: string; avatar_url: string | null; power_level: number }[];
+    mostTrophies: { profile_id: string; username: string; avatar_url: string | null; count: number }[];
+  }>({ mostTournamentWins: [], highestPower: [], mostTrophies: [] });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -120,12 +125,56 @@ export default function RankingsPage() {
     if (tab === 'clans') fetchClans();
   }, [tab]);
 
+  useEffect(() => {
+    async function fetchHallOfFame() {
+      setLoading(true);
+      const [winsRes, powerRes, trophiesRes] = await Promise.all([
+        supabase.from('tournament_results').select('winner_profile_id'),
+        supabase.from('profiles').select('id, username, avatar_url, power_level').not('power_level', 'is', null).order('power_level', { ascending: false }).limit(10),
+        supabase.from('trophies').select('profile_id'),
+      ]);
+      const winCounts = new Map<string, number>();
+      for (const w of winsRes.data ?? []) {
+        winCounts.set(w.winner_profile_id, (winCounts.get(w.winner_profile_id) ?? 0) + 1);
+      }
+      const trophyCounts = new Map<string, number>();
+      for (const t of trophiesRes.data ?? []) {
+        trophyCounts.set(t.profile_id, (trophyCounts.get(t.profile_id) ?? 0) + 1);
+      }
+      const winSorted = [...winCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+      const trophySorted = [...trophyCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+      const winIds = winSorted.map(([id]) => id);
+      const trophyIds = trophySorted.map(([id]) => id);
+      const { data: winProfiles } = winIds.length ? await supabase.from('profiles').select('id, username, avatar_url').in('id', winIds) : { data: [] };
+      const { data: trophyProfiles } = trophyIds.length ? await supabase.from('profiles').select('id, username, avatar_url').in('id', trophyIds) : { data: [] };
+      const winProfMap = new Map((winProfiles ?? []).map((p) => [p.id, p]));
+      const trophyProfMap = new Map((trophyProfiles ?? []).map((p) => [p.id, p]));
+      setHallOfFame({
+        mostTournamentWins: winSorted.map(([id, wins]) => ({ profile_id: id, username: winProfMap.get(id)?.username ?? 'Unknown', avatar_url: winProfMap.get(id)?.avatar_url ?? null, wins })),
+        highestPower: (powerRes.data ?? []).map((p) => ({ profile_id: p.id, username: p.username, avatar_url: p.avatar_url, power_level: p.power_level ?? 0 })),
+        mostTrophies: trophySorted.map(([id, count]) => ({ profile_id: id, username: trophyProfMap.get(id)?.username ?? 'Unknown', avatar_url: trophyProfMap.get(id)?.avatar_url ?? null, count })),
+      });
+      setLoading(false);
+    }
+    if (tab === 'hallOfFame') fetchHallOfFame();
+  }, [tab]);
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="font-display text-2xl font-bold text-text-primary mb-2">Rankings</h1>
-      <p className="text-text-muted mb-6">
-        User power levels and clan leaderboards. Submit results from the end screen to climb.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-text-primary mb-2">Rankings</h1>
+          <p className="text-text-muted">
+            User power levels and clan leaderboards. Submit results from the end screen to climb.
+          </p>
+        </div>
+        <Link
+          href="/submit-result/"
+          className="px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90 shrink-0"
+        >
+          Submit Result
+        </Link>
+      </div>
 
       <AdSlot slotId="rankings-hero-below" className="mb-6" />
 
@@ -147,6 +196,15 @@ export default function RankingsPage() {
           }`}
         >
           Clans
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('hallOfFame')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            tab === 'hallOfFame' ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'
+          }`}
+        >
+          Hall of Fame
         </button>
       </div>
 
@@ -233,6 +291,66 @@ export default function RankingsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )
+      )}
+
+      {tab === 'hallOfFame' && (
+        loading ? (
+          <p className="text-text-muted">Loading...</p>
+        ) : (
+          <div className="space-y-8">
+            <div className="rounded-xl border border-border bg-panel p-6">
+              <h2 className="text-lg font-semibold text-text-primary mb-4">Most Tournament Wins</h2>
+              {hallOfFame.mostTournamentWins.length === 0 ? (
+                <p className="text-text-muted">No tournament wins yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {hallOfFame.mostTournamentWins.map((r, i) => (
+                    <Link key={r.profile_id} href={`/profile/${r.profile_id}/`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5">
+                      <span className="text-text-muted font-medium w-6">{i + 1}</span>
+                      {r.avatar_url ? <img src={r.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" /> : <div className="w-8 h-8 rounded-full bg-accent/20" />}
+                      <span className="text-text-primary font-medium">{r.username}</span>
+                      <span className="text-accent">{r.wins} wins</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="rounded-xl border border-border bg-panel p-6">
+              <h2 className="text-lg font-semibold text-text-primary mb-4">Highest Power Level</h2>
+              {hallOfFame.highestPower.length === 0 ? (
+                <p className="text-text-muted">No data yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {hallOfFame.highestPower.map((r, i) => (
+                    <Link key={r.profile_id} href={`/profile/${r.profile_id}/`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5">
+                      <span className="text-text-muted font-medium w-6">{i + 1}</span>
+                      {r.avatar_url ? <img src={r.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" /> : <div className="w-8 h-8 rounded-full bg-accent/20" />}
+                      <span className="text-text-primary font-medium">{r.username}</span>
+                      <span className="text-accent">{r.power_level} pts</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="rounded-xl border border-border bg-panel p-6">
+              <h2 className="text-lg font-semibold text-text-primary mb-4">Most Trophies</h2>
+              {hallOfFame.mostTrophies.length === 0 ? (
+                <p className="text-text-muted">No trophies yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {hallOfFame.mostTrophies.map((r, i) => (
+                    <Link key={r.profile_id} href={`/profile/${r.profile_id}/`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5">
+                      <span className="text-text-muted font-medium w-6">{i + 1}</span>
+                      {r.avatar_url ? <img src={r.avatar_url} alt="" className="w-8 h-8 rounded-full object-cover" /> : <div className="w-8 h-8 rounded-full bg-accent/20" />}
+                      <span className="text-text-primary font-medium">{r.username}</span>
+                      <span className="text-accent">{r.count} trophies</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )
       )}

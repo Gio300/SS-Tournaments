@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 export default function LoginPage() {
@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/profile/'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -22,7 +24,7 @@ export default function LoginPage() {
       setError(error.message)
       return
     }
-    router.push('/')
+    router.push(redirectTo)
   }
 
   async function handleOAuth(provider: 'google' | 'github' | 'facebook') {

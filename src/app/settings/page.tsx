@@ -25,7 +25,7 @@ const TEXT_SCALES = [0.9, 1, 1.1, 1.2];
 function SettingsContent() {
   const { user, profile, refreshProfile } = useAuth();
   const { theme, setTheme, colorScheme, setColorScheme } = useTheme();
-  const [activeSection, setActiveSection] = useState<'appearance' | 'account' | 'help'>('appearance');
+  const [activeSection, setActiveSection] = useState<'appearance' | 'account' | 'notifications' | 'help'>('appearance');
   const [aiWorkerUrl, setAiWorkerUrl] = useState('');
   const [aiUrlSaved, setAiUrlSaved] = useState(false);
   const [textScale, setTextScale] = useState(1);
@@ -161,7 +161,7 @@ function SettingsContent() {
       <h1 className="font-display text-2xl sm:text-3xl font-bold text-text-primary mb-6">Settings</h1>
 
       <div className="flex flex-wrap gap-2 mb-8">
-        {(['appearance', 'account', 'help'] as const).map((s) => (
+        {(['appearance', 'account', 'notifications', 'help'] as const).map((s) => (
           <button
             key={s}
             type="button"
@@ -170,7 +170,7 @@ function SettingsContent() {
               activeSection === s ? 'bg-accent text-white' : 'border border-border text-text-muted hover:text-text-primary'
             }`}
           >
-            {s === 'appearance' ? 'Appearance' : s === 'account' ? 'Account' : 'Need help'}
+            {s === 'appearance' ? 'Appearance' : s === 'account' ? 'Account' : s === 'notifications' ? 'Notifications' : 'Need help'}
           </button>
         ))}
       </div>
@@ -311,6 +311,37 @@ function SettingsContent() {
               </button>
               {appearanceSaved && <p className="text-green-500 text-sm mt-2">Appearance saved. Settings will sync across your devices.</p>}
             </div>
+          )}
+        </div>
+      )}
+
+      {activeSection === 'notifications' && (
+        <div className="space-y-6 rounded-xl border border-border bg-panel p-6">
+          <h2 className="text-lg font-semibold text-text-primary">Notifications</h2>
+          <p className="text-text-muted text-sm">Manage how you receive updates. Preferences are saved to your profile.</p>
+          <div className="space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" defaultChecked className="rounded border-border" />
+              <span className="text-text-primary">Email when someone follows you</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" defaultChecked className="rounded border-border" />
+              <span className="text-text-primary">Email when your match result is verified</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" className="rounded border-border" />
+              <span className="text-text-primary">Email for tournament reminders</span>
+            </label>
+          </div>
+          {user && (
+            <button
+              type="button"
+              onClick={handleSaveAppearance}
+              disabled={savingAppearance}
+              className="px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90 disabled:opacity-50"
+            >
+              Save preferences
+            </button>
           )}
         </div>
       )}

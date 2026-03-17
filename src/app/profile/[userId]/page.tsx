@@ -61,9 +61,10 @@ export default function ProfileViewPage() {
           )}
           <div className="flex-1">
             <h1 className="font-display text-xl font-bold text-text-primary">{profile.username}</h1>
-            <p className="text-accent text-sm mt-1 flex items-center">
+            <p className="text-accent text-sm mt-1 flex items-center gap-2">
               Power level: {profile.power_level ?? 0} pts
               <TrophyBadges trophyTypes={trophyTypes} />
+              <Link href={`/profile/${userId}/trophies/`} className="text-accent hover:underline text-sm">Trophies earned</Link>
             </p>
             {profile.status && <p className="text-text-muted mt-2 italic">&quot;{profile.status}&quot;</p>}
             {profile.bio && <p className="text-text-muted mt-2">{profile.bio}</p>}

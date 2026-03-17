@@ -7,11 +7,12 @@ const TROPHY_CONFIG: Record<string, { label: string; icon: typeof Trophy; title:
   top_dog: { label: 'Top Dog', icon: Star, title: '1,000+ pts – Rising star' },
   legendary: { label: 'Legendary', icon: Crown, title: '5,000+ pts – Elite player' },
   its_over_9000: { label: "It's Over 9000!", icon: Trophy, title: '9,000+ pts – Ultimate power' },
+  tournament_win: { label: 'Tournament Winner', icon: Trophy, title: 'Won a tournament' },
 };
 
 export function TrophyBadges({ trophyTypes }: { trophyTypes: string[] }) {
   if (!trophyTypes?.length) return null;
-  const ordered = ['centurion', 'top_dog', 'legendary', 'its_over_9000'].filter((t) =>
+  const ordered = ['centurion', 'top_dog', 'legendary', 'its_over_9000', 'tournament_win'].filter((t) =>
     trophyTypes.includes(t)
   );
   if (ordered.length === 0) return null;
