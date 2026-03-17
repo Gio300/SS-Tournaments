@@ -42,8 +42,21 @@ function run(cmd: string, args: string[], cwd?: string): Promise<void> {
   })
 }
 
+function getYtDlpPath(): string {
+  const localPath = path.join(__dirname, 'yt-dlp.exe')
+  if (fs.existsSync(localPath)) return localPath
+  return 'yt-dlp'
+}
+
+function getFfmpegPath(): string {
+  const localPath = path.join(__dirname, 'ffmpeg.exe')
+  if (fs.existsSync(localPath)) return localPath
+  return 'ffmpeg'
+}
+
 async function downloadWithYtDlp(url: string, outDir: string, index: number): Promise<string> {
   const outPath = path.join(outDir, `clip_${index}.mp4`)
+  const ytdlp = getYtDlpPath()
   const args = [
     '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
     '-o', outPath,
@@ -51,7 +64,7 @@ async function downloadWithYtDlp(url: string, outDir: string, index: number): Pr
     '--no-warnings',
     url,
   ]
-  await run('yt-dlp', args, outDir)
+  await run(ytdlp, args, outDir)
   if (!fs.existsSync(outPath)) {
     throw new Error(`yt-dlp did not produce ${outPath}`)
   }
@@ -62,7 +75,7 @@ async function concatWithFfmpeg(files: string[], outPath: string): Promise<void>
   const listPath = path.join(path.dirname(outPath), 'list.txt')
   const listContent = files.map((f) => `file '${path.basename(f)}'`).join('\n')
   fs.writeFileSync(listPath, listContent)
-  await run('ffmpeg', [
+  await run(getFfmpegPath(), [
     '-y',
     '-f', 'concat',
     '-safe', '0',
