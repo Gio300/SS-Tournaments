@@ -19,7 +19,7 @@ export default function TrophiesPage() {
   const params = useParams();
   const userId = params.userId as string;
   const [profile, setProfile] = useState<{ username: string } | null>(null);
-  const [trophies, setTrophies] = useState<(TrophyType & { tournament_name?: string })[]>([]);
+  const [trophies, setTrophies] = useState<(TrophyRow & { tournament_name?: string })[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
