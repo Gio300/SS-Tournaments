@@ -67,6 +67,28 @@ export function ReelDetailClient() {
           <p className="text-text-muted mt-2">
             by {reel.profiles?.username ?? 'Unknown'} • {reel.clip_ids?.length ?? 0} clips
           </p>
+          {reel.combined_video_url && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              <a
+                href={reel.combined_video_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-semibold hover:opacity-90"
+              >
+                Download
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  const url = typeof window !== 'undefined' ? window.location.href : ''
+                  navigator.clipboard?.writeText(url)
+                }}
+                className="px-4 py-2 rounded-lg border border-accent text-accent text-sm font-semibold hover:bg-accent/10"
+              >
+                Copy link
+              </button>
+            </div>
+          )}
         </div>
       </div>
       <Link href="/reels/" className="inline-block mt-6 text-accent hover:underline">← Back to Reels</Link>

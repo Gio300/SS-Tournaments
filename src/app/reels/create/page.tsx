@@ -16,48 +16,112 @@ type ClipInput =
 
 type TimeMode = 'auto' | 'manual'
 
-const PROGRESS_STEPS = ['Initializing', 'Processing clips', 'Combining videos', 'Uploading', 'Creating reel', 'Finalizing']
+const PROGRESS_STEPS = ['Downloading clips', 'Combining videos', 'Uploading', 'Creating reel', 'Done']
 
-function ProcessingPip({
+function ProgressSection({
   show,
   progress,
   step,
-  onClose,
 }: {
   show: boolean
   progress: number
   step: string
-  onClose?: () => void
 }) {
   if (!show) return null
   const stepIndex = PROGRESS_STEPS.indexOf(step)
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-80 rounded-xl border border-border bg-panel shadow-xl overflow-hidden">
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-text-primary">Creating highlight</span>
-          {onClose && (
-            <button type="button" onClick={onClose} className="text-text-muted hover:text-text-primary text-sm">
-              ×
-            </button>
-          )}
-        </div>
-        <div className="h-2 rounded-full bg-bg overflow-hidden mb-2">
+    <div className="rounded-xl border border-border bg-panel p-6 animate-in fade-in duration-300">
+      <h3 className="text-sm font-semibold text-text-primary mb-3">Creating your highlight</h3>
+      <div className="h-3 rounded-full bg-bg overflow-hidden mb-3">
+        <div
+          className="h-full bg-accent transition-all duration-500 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <p className="text-sm text-text-muted mb-4">{step}</p>
+      <div className="flex gap-1">
+        {PROGRESS_STEPS.map((s, i) => (
           <div
-            className="h-full bg-accent transition-all duration-300"
-            style={{ width: `${progress}%` }}
+            key={s}
+            className={`h-1.5 flex-1 rounded transition-colors ${i <= stepIndex ? 'bg-accent' : 'bg-bg'}`}
+            title={s}
           />
-        </div>
-        <p className="text-xs text-text-muted">{step}</p>
-        <div className="flex gap-1 mt-2">
-          {PROGRESS_STEPS.map((s, i) => (
-            <div
-              key={s}
-              className={`h-1 flex-1 rounded ${i <= stepIndex ? 'bg-accent' : 'bg-bg'}`}
-              title={s}
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function YoutubeSignInModal({
+  show,
+  onClose,
+  onContinue,
+  cookies,
+  onCookiesChange,
+  creating,
+  progress,
+  step,
+}: {
+  show: boolean
+  onClose: () => void
+  onContinue: () => void
+  cookies: string
+  onCookiesChange: (v: string) => void
+  creating: boolean
+  progress: number
+  step: string
+}) {
+  if (!show) return null
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={creating ? undefined : onClose}>
+      <div className="w-full max-w-lg rounded-xl border border-border bg-panel shadow-xl p-6" onClick={(e) => e.stopPropagation()}>
+        {creating ? (
+          <>
+            <h3 className="font-display text-lg font-bold text-text-primary mb-2">Creating your highlight</h3>
+            <div className="h-3 rounded-full bg-bg overflow-hidden mb-3">
+              <div className="h-full bg-accent transition-all duration-500" style={{ width: `${progress}%` }} />
+            </div>
+            <p className="text-sm text-text-muted">{step}</p>
+          </>
+        ) : (
+          <>
+            <h3 className="font-display text-lg font-bold text-text-primary mb-2">Link YouTube to create highlight</h3>
+            <p className="text-sm text-text-muted mb-4">
+              YouTube may block downloads. Sign in to YouTube in a new tab, then paste your cookies below so we can download the clips.
+            </p>
+            <a
+              href="https://www.youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 mb-4"
+            >
+              Open YouTube to sign in
+            </a>
+            <textarea
+              value={cookies}
+              onChange={(e) => onCookiesChange(e.target.value)}
+              placeholder="Paste Netscape-format cookies here (optional – try without first)"
+              rows={4}
+              className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-text-primary text-xs font-mono placeholder:text-text-muted mb-2"
             />
-          ))}
-        </div>
+            <p className="text-xs text-text-muted mb-4">
+              <a href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">How to export cookies</a> • Cookies are not stored
+            </p>
+            <div className="flex gap-2">
+              <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-border text-text-muted hover:text-text-primary">
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={onContinue}
+                disabled={creating}
+                className="px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90 disabled:opacity-50"
+              >
+                Create Highlight
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
@@ -81,7 +145,8 @@ function CreateReelContent() {
   const [pipProgress, setPipProgress] = useState(0)
   const [showPip, setShowPip] = useState(false)
   const [youtubeCookies, setYoutubeCookies] = useState('')
-  const [showCookiesHelp, setShowCookiesHelp] = useState(false)
+  const [showYoutubeModal, setShowYoutubeModal] = useState(false)
+  const [completedReel, setCompletedReel] = useState<{ id: string; combinedVideoUrl: string; title: string } | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -138,6 +203,45 @@ function CreateReelContent() {
     setClips((c) => c.filter((_, j) => j !== i))
   }
 
+  async function doYoutubeCombine() {
+    const youtubeClips = clips.filter((c): c is ClipInput & { type: 'youtube' } => c.type === 'youtube')
+    const combineUrl = process.env.NEXT_PUBLIC_COMBINE_API_URL!
+    setSaving(true)
+    setShowPip(true)
+    setPipStep('Downloading clips')
+    setPipProgress(15)
+    try {
+      setPipStep('Combining videos')
+      setPipProgress(40)
+      const res = await fetch(`${combineUrl.replace(/\/$/, '')}/combine`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          urls: youtubeClips.map((c) => c.url),
+          title: title.trim(),
+          userId: user!.id,
+          ...(youtubeCookies.trim() && { cookies: youtubeCookies.trim() }),
+        }),
+      })
+      const data = await res.json()
+      // #region agent log
+      if (!res.ok) {
+        fetch('http://127.0.0.1:7308/ingest/8d921e9d-92c7-4815-8e32-88bd8715ba82',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'8792d5'},body:JSON.stringify({sessionId:'8792d5',location:'reels/create/page.tsx:combine',message:'Combine API error',data:{status:res.status,error:data.error,urls:youtubeClips.map(c=>c.url)},hypothesisId:'A',timestamp:Date.now()})}).catch(()=>{});
+      }
+      // #endregion
+      if (!res.ok) throw new Error(data.error || 'Combine failed')
+      setPipStep('Done')
+      setPipProgress(100)
+      setCompletedReel({ id: data.reelId, combinedVideoUrl: data.combinedVideoUrl, title: title.trim() })
+      setShowYoutubeModal(false)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Combine failed')
+    } finally {
+      setShowPip(false)
+      setSaving(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -162,40 +266,9 @@ function CreateReelContent() {
         setError('Combine service not configured. Add NEXT_PUBLIC_COMBINE_API_URL to enable YouTube combine, or upload 2–8 video files instead.')
         return
       }
-      setSaving(true)
-      setShowPip(true)
-      setPipStep('Downloading clips')
-      setPipProgress(10)
-      try {
-        setPipStep('Combining videos')
-        setPipProgress(30)
-        const res = await fetch(`${combineUrl.replace(/\/$/, '')}/combine`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            urls: youtubeClips.map((c) => c.url),
-            title: title.trim(),
-            userId: user!.id,
-            ...(youtubeCookies.trim() && { cookies: youtubeCookies.trim() }),
-          }),
-        })
-        const data = await res.json()
-        // #region agent log
-        if (!res.ok) {
-          fetch('http://127.0.0.1:7308/ingest/8d921e9d-92c7-4815-8e32-88bd8715ba82',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'8792d5'},body:JSON.stringify({sessionId:'8792d5',location:'reels/create/page.tsx:combine',message:'Combine API error',data:{status:res.status,error:data.error,urls:youtubeClips.map(c=>c.url)},hypothesisId:'A',timestamp:Date.now()})}).catch(()=>{});
-        }
-        // #endregion
-        if (!res.ok) throw new Error(data.error || 'Combine failed')
-        setPipStep('Finalizing')
-        setPipProgress(100)
-        router.push(`/reels/${data.reelId}/`)
-        return
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Combine failed')
-        setShowPip(false)
-        setSaving(false)
-        return
-      }
+      setShowYoutubeModal(true)
+      setPendingYoutubeSubmit(true)
+      return
     }
 
     setSaving(true)
@@ -279,9 +352,9 @@ function CreateReelContent() {
         .single()
 
       if (reelErr) throw reelErr
-      setPipStep('Finalizing')
+      setPipStep('Done')
       setPipProgress(100)
-      router.push(`/reels/${reelData.id}/`)
+      setCompletedReel({ id: reelData.id, combinedVideoUrl: combinedUrl ?? '', title: title.trim() })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to create reel')
       setShowPip(false)
@@ -439,39 +512,6 @@ function CreateReelContent() {
 
         {error && <p className="text-accent text-sm">{error}</p>}
 
-        {youtubeClips.length >= 2 && uploadClips.length === 0 && (
-          <div className="rounded-lg border border-border bg-panel p-4">
-            <button
-              type="button"
-              onClick={() => setShowCookiesHelp((s) => !s)}
-              className="flex items-center gap-2 text-sm text-text-muted hover:text-text-primary w-full text-left"
-            >
-              <span>{showCookiesHelp ? '▼' : '▶'}</span>
-              YouTube blocking? Link your account with cookies
-            </button>
-            {showCookiesHelp && (
-              <div className="mt-3 space-y-2 text-sm">
-                <p className="text-text-muted">
-                  If you see &quot;Sign in to confirm you&apos;re not a bot&quot;, sign in to YouTube in another tab, then export cookies and paste below.
-                </p>
-                <ol className="list-decimal list-inside text-text-muted space-y-1">
-                  <li>Sign in to <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">youtube.com</a></li>
-                  <li>Export cookies in Netscape format (<a href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">guide</a>)</li>
-                  <li>Paste the contents below</li>
-                </ol>
-                <textarea
-                  value={youtubeCookies}
-                  onChange={(e) => setYoutubeCookies(e.target.value)}
-                  placeholder="Paste Netscape-format cookies here (optional)"
-                  rows={4}
-                  className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-text-primary text-xs font-mono placeholder:text-text-muted"
-                />
-                <p className="text-xs text-text-muted">Cookies are sent only with this request and are not stored.</p>
-              </div>
-            )}
-          </div>
-        )}
-
         <button
           type="submit"
           disabled={saving || ffmpegLoading || clips.length === 0}
@@ -481,10 +521,66 @@ function CreateReelContent() {
         </button>
       </form>
 
-      <ProcessingPip
+      <ProgressSection
         show={showPip && (saving || ffmpegLoading)}
         progress={ffmpegLoading ? progress : pipProgress}
         step={ffmpegLoading ? 'Combining videos' : pipStep || 'Initializing'}
+      />
+
+      {completedReel && (
+        <div className="mt-8 rounded-xl border border-border bg-panel overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="p-4 border-b border-border">
+            <h3 className="font-display text-lg font-bold text-text-primary">Your highlight is ready!</h3>
+            <p className="text-sm text-text-muted mt-1">{completedReel.title}</p>
+          </div>
+          <div className="aspect-video bg-black">
+            <video src={completedReel.combinedVideoUrl} controls className="w-full h-full" />
+          </div>
+          <div className="p-4 flex flex-wrap gap-3">
+            <a
+              href={completedReel.combinedVideoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90"
+            >
+              Download / Open
+            </a>
+            <button
+              type="button"
+              onClick={() => {
+                const url = typeof window !== 'undefined' ? `${window.location.origin}/reels/${completedReel.id}/` : ''
+                navigator.clipboard?.writeText(url)
+              }}
+              className="px-4 py-2 rounded-lg border border-accent text-accent font-semibold hover:bg-accent/10"
+            >
+              Copy link
+            </button>
+            <Link
+              href={`/reels/${completedReel.id}/`}
+              className="px-4 py-2 rounded-lg border border-border text-text-muted hover:text-text-primary font-semibold"
+            >
+              View full reel
+            </Link>
+            <button
+              type="button"
+              onClick={() => { setCompletedReel(null); setClips([]); setTitle('') }}
+              className="px-4 py-2 rounded-lg border border-border text-text-muted hover:text-text-primary font-semibold"
+            >
+              Create another
+            </button>
+          </div>
+        </div>
+      )}
+
+      <YoutubeSignInModal
+        show={showYoutubeModal}
+        onClose={() => setShowYoutubeModal(false)}
+        onContinue={doYoutubeCombine}
+        cookies={youtubeCookies}
+        onCookiesChange={setYoutubeCookies}
+        creating={saving}
+        progress={pipProgress}
+        step={pipStep}
       />
     </div>
   )

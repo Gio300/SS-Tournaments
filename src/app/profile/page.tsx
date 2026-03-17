@@ -37,6 +37,7 @@ function ProfileContent() {
   const [gameTag, setGameTag] = useState('')
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [trophyTypes, setTrophyTypes] = useState<string[]>([])
+  const [myReels, setMyReels] = useState<ReelWithProfile[]>([])
 
   useEffect(() => {
     setUsername(profile?.username ?? '')
@@ -54,6 +55,20 @@ function ProfileContent() {
     }
     fetchTrophies()
   }, [user?.id])
+
+  useEffect(() => {
+    if (!user) return
+    const uid = user.id
+    async function fetchMyReels() {
+      const { data } = await supabase
+        .from('reels')
+        .select('*, profiles(username)')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false })
+      setMyReels((data ?? []) as ReelWithProfile[])
+    }
+    fetchMyReels()
+  }, [user?.id, refreshKey])
 
   useEffect(() => {
     if (!user) return
@@ -386,6 +401,34 @@ function ProfileContent() {
           Create Highlight
         </Link>
       </div>
+
+      {myReels.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-text-primary mb-4">Clip Archive</h2>
+          <p className="text-text-muted text-sm mb-4">Your highlight reels. Click to watch on our site.</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {myReels.map((reel) => (
+              <Link
+                key={reel.id}
+                href={`/reels/${reel.id}/`}
+                className="block rounded-xl border border-border bg-panel overflow-hidden hover:border-accent/50 transition-colors group"
+              >
+                <div className="aspect-video bg-bg flex items-center justify-center">
+                  {reel.combined_video_url ? (
+                    <video src={reel.combined_video_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform" muted playsInline />
+                  ) : (
+                    <span className="text-4xl text-text-muted">▶</span>
+                  )}
+                </div>
+                <div className="p-3">
+                  <h3 className="font-medium text-text-primary truncate">{reel.title}</h3>
+                  <p className="text-xs text-text-muted">{reel.clip_ids?.length ?? 0} clips</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <PostComposer onPosted={() => setRefreshKey((k) => k + 1)} />
 
