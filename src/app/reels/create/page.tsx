@@ -267,7 +267,6 @@ function CreateReelContent() {
         return
       }
       setShowYoutubeModal(true)
-      setPendingYoutubeSubmit(true)
       return
     }
 
