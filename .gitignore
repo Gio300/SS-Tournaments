@@ -36,3 +36,7 @@ supabase/.temp/
 # Local combine tools (downloaded by setup)
 scripts/yt-dlp.exe
 scripts/ffmpeg.exe
+
+# Google Cloud SDK (downloaded for gcloud CLI; use system install instead)
+google-cloud-sdk/
+google-cloud-sdk.zip
