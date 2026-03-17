@@ -56,7 +56,7 @@ export function TournamentDetailClient() {
       setStatSubmissions((statData ?? []) as SubmissionWithProfile[]);
       const resList = (resultsData ?? []) as TournamentResult[];
       if (resList.length > 0) {
-        const winnerIds = [...new Set(resList.map((r) => r.winner_profile_id))];
+        const winnerIds = Array.from(new Set(resList.map((r) => r.winner_profile_id)));
         const { data: profData } = await supabase.from('profiles').select('id, username').in('id', winnerIds);
         const profMap = new Map((profData ?? []).map((p) => [p.id, p.username]));
         setResults(resList.map((r) => ({ ...r, winner_username: profMap.get(r.winner_profile_id) ?? 'Unknown' })));
@@ -143,7 +143,7 @@ export function TournamentDetailClient() {
       const { data: resData } = await supabase.from('tournament_results').select('*').eq('tournament_id', id).order('created_at', { ascending: false });
       const resList = (resData ?? []) as TournamentResult[];
       if (resList.length > 0) {
-        const winnerIds = [...new Set(resList.map((r) => r.winner_profile_id))];
+        const winnerIds = Array.from(new Set(resList.map((r) => r.winner_profile_id)));
         const { data: profData } = await supabase.from('profiles').select('id, username').in('id', winnerIds);
         const profMap = new Map((profData ?? []).map((p) => [p.id, p.username]));
         setResults(resList.map((r) => ({ ...r, winner_username: profMap.get(r.winner_profile_id) ?? 'Unknown' })));
