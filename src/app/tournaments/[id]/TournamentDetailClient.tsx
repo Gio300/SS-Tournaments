@@ -188,7 +188,7 @@ export function TournamentDetailClient() {
     if (!isCreator) return;
     await supabase.from('tournament_admins').delete().eq('tournament_id', id).eq('user_id', uid);
     const { data } = await supabase.from('tournament_admins').select('user_id, profiles(username)').eq('tournament_id', id);
-    setAdmins((data ?? []) as { user_id: string; profiles?: { username: string } }[]);
+    setAdmins((data ?? []) as unknown as { user_id: string; profiles?: { username: string } }[]);
   }
 
   if (loading) return <div className="max-w-3xl mx-auto px-4 py-8 text-text-muted">Loading...</div>;
