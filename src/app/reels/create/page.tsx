@@ -177,6 +177,11 @@ function CreateReelContent() {
           }),
         })
         const data = await res.json()
+        // #region agent log
+        if (!res.ok) {
+          fetch('http://127.0.0.1:7308/ingest/8d921e9d-92c7-4815-8e32-88bd8715ba82',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'8792d5'},body:JSON.stringify({sessionId:'8792d5',location:'reels/create/page.tsx:combine',message:'Combine API error',data:{status:res.status,error:data.error,urls:youtubeClips.map(c=>c.url)},hypothesisId:'A',timestamp:Date.now()})}).catch(()=>{});
+        }
+        // #endregion
         if (!res.ok) throw new Error(data.error || 'Combine failed')
         setPipStep('Finalizing')
         setPipProgress(100)

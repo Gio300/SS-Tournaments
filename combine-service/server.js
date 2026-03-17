@@ -50,13 +50,29 @@ function run(cmd, args, cwd) {
 
 async function downloadWithYtDlp(url, outDir, index) {
   const outPath = path.join(outDir, `clip_${index}.mp4`);
-  await run('yt-dlp', [
+  const args = [
     '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
     '-o', outPath,
     '--no-playlist',
     '--no-warnings',
+    // Workaround for "Sign in to confirm you're not a bot" - try android client first
+    '--extractor-args', 'youtube:player_client=android',
     url,
-  ], outDir);
+  ];
+  // If YOUTUBE_COOKIES env has Netscape-format cookies, use them (most reliable fix)
+  const cookiesEnv = process.env.YOUTUBE_COOKIES;
+  if (cookiesEnv && cookiesEnv.trim()) {
+    const cookiesPath = path.join(os.tmpdir(), `cookies-${Date.now()}.txt`);
+    fs.writeFileSync(cookiesPath, cookiesEnv.trim());
+    args.splice(-1, 0, '--cookies', cookiesPath);
+    try {
+      await run('yt-dlp', args, outDir);
+    } finally {
+      try { fs.unlinkSync(cookiesPath); } catch (_) {}
+    }
+  } else {
+    await run('yt-dlp', args, outDir);
+  }
   if (!fs.existsSync(outPath)) throw new Error(`yt-dlp did not produce clip_${index}.mp4`);
   return outPath;
 }
