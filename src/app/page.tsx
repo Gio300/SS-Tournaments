@@ -81,11 +81,13 @@ export default function HomePage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-      <HeroBg className="border border-border rounded-xl p-6 sm:p-8 mb-8 min-h-[180px] flex flex-col justify-center">
-        <BrandLogo as="h1" variant="image" className="mb-3" />
-        <p className="text-text-muted text-lg sm:text-xl">
-          Social platform for gaming · Rankings · Matches · Clans · Tournaments
-        </p>
+      <HeroBg className="border border-border rounded-xl p-6 sm:p-8 mb-8 min-h-[140px] flex flex-col justify-center">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-6">
+          <BrandLogo as="h1" variant="image" className="shrink-0" />
+          <p className="text-text-muted text-lg sm:text-xl text-center sm:text-left">
+            Social platform for gaming · Rankings · Matches · Clans · Tournaments
+          </p>
+        </div>
       </HeroBg>
 
       <AdSlot slotId="home-hero-below" className="mb-8" />

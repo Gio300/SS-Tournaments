@@ -28,12 +28,15 @@ export function BrandLogo({ className = '', as: Tag = 'span', variant = 'text' }
 
   const src = basePath ? `${basePath}/buttonmasherz-logo.png` : '/buttonmasherz-logo.png';
   return (
-    <Tag className={`inline-flex items-center justify-center w-full ${className}`}>
+    <Tag className={`inline-flex items-center justify-center w-auto max-w-[16rem] ${className}`}>
       <img
         src={src}
         alt="ButtonMasherz"
-        className="w-full max-w-[10rem] sm:max-w-[12rem] md:max-w-[14rem] lg:max-w-[16rem] object-contain opacity-[0.85]"
-        style={{ mixBlendMode: 'overlay' }}
+        className="w-full max-w-[12rem] sm:max-w-[14rem] md:max-w-[16rem] object-contain"
+        style={{
+          maskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 55%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 55%, transparent 100%)',
+        }}
       />
     </Tag>
   );
