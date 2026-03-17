@@ -28,14 +28,14 @@ export function BrandLogo({ className = '', as: Tag = 'span', variant = 'text' }
 
   const src = basePath ? `${basePath}/buttonmasherz-logo.png` : '/buttonmasherz-logo.png';
   return (
-    <Tag className={`inline-flex items-center justify-center w-auto max-w-[16rem] ${className}`}>
+    <Tag className={`inline-flex items-center justify-center w-auto max-w-[28rem] ${className}`}>
       <img
         src={src}
         alt="ButtonMasherz"
-        className="w-full max-w-[12rem] sm:max-w-[14rem] md:max-w-[16rem] object-contain"
+        className="w-full max-w-[18rem] sm:max-w-[22rem] md:max-w-[26rem] object-contain"
         style={{
-          maskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 55%, transparent 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 55%, transparent 100%)',
+          maskImage: 'radial-gradient(ellipse 100% 100% at 50% 50%, black 92%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 100% 100% at 50% 50%, black 92%, transparent 100%)',
         }}
       />
     </Tag>
