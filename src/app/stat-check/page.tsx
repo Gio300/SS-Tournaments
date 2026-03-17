@@ -44,7 +44,3 @@ export default function StatCheckPage() {
     </div>
   );
 }
-
-export default function StatCheckPage() {
-  return <StatCheckContent />;
-}
