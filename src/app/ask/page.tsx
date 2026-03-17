@@ -49,7 +49,7 @@ export default function AskPage() {
       <div className="bg-panel border border-border rounded-xl flex flex-col overflow-hidden min-h-[60vh] sm:min-h-[400px]">
         <div className="px-4 py-3 border-b border-border bg-panel/80">
           <p className="text-sm font-medium text-text-primary">
-            How does SmashHub work? Ask about the platform or rules for a specific tournament.
+            How does ButtonMasherz work? Ask about the platform or rules for a specific tournament.
           </p>
         </div>
 

@@ -15,8 +15,8 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const orbitron = Orbitron({ subsets: ['latin'], variable: '--font-orbitron' });
 
 export const metadata: Metadata = {
-  title: 'SmashHub',
-  description: 'SmashHub – Tournaments, reels, matches, clans, and live streams. Create, join, and compete.',
+  title: 'ButtonMasherz',
+  description: 'ButtonMasherz – Tournaments, reels, matches, clans, and live streams. Create, join, and compete.',
   viewport: 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes',
   icons: [{ url: basePath ? `${basePath}/favicon.svg` : '/favicon.svg', sizes: 'any', type: 'image/svg+xml' }],
 };

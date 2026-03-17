@@ -238,7 +238,7 @@ export function OBSControl() {
             <p className="text-text-muted text-sm mb-2">Setup: OBS → Tools → obs-websocket Settings → Enable WebSocket server (port {port}).</p>
             <ul className="text-xs text-text-muted space-y-1 list-disc list-inside">
               <li><strong>YouTube:</strong> OBS → Settings → Stream → Service: YouTube Live.</li>
-              <li><strong>Cloud:</strong> Use Mux, LiveKit, etc. – RTMP URL in OBS, playback URL in SmashHub.</li>
+              <li><strong>Cloud:</strong> Use Mux, LiveKit, etc. – RTMP URL in OBS, playback URL in ButtonMasherz.</li>
             </ul>
           </div>
         </div>

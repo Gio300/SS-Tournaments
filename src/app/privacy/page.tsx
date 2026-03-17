@@ -12,7 +12,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-text-primary mb-2">1. Information We Collect</h2>
           <p>
-            SmashHub collects information you provide when you create an account, use our services, or interact with the platform:
+            ButtonMasherz collects information you provide when you create an account, use our services, or interact with the platform:
           </p>
           <ul className="list-disc pl-6 mt-2 space-y-1">
             <li>Account information: email address, username, and password (hashed)</li>
@@ -26,7 +26,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-text-primary mb-2">2. How We Use Your Information</h2>
           <p>
-            We use your information to operate SmashHub, including:
+            We use your information to operate ButtonMasherz, including:
           </p>
           <ul className="list-disc pl-6 mt-2 space-y-1">
             <li>Providing and improving our services (rankings, clans, tournaments, live streams)</li>
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-text-primary mb-2">3. Third-Party Services</h2>
           <p>
-            We use the following third-party services to operate SmashHub:
+            We use the following third-party services to operate ButtonMasherz:
           </p>
           <ul className="list-disc pl-6 mt-2 space-y-1">
             <li><strong>Supabase</strong>: Authentication, database, and file storage</li>
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
             <li><strong>Google / GitHub</strong>: Optional OAuth login</li>
           </ul>
           <p className="mt-2">
-            These services have their own privacy policies. By using SmashHub, you consent to data being processed by these providers as necessary to deliver our services.
+            These services have their own privacy policies. By using ButtonMasherz, you consent to data being processed by these providers as necessary to deliver our services.
           </p>
         </section>
 

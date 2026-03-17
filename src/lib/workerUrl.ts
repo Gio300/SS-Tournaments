@@ -3,7 +3,7 @@
  * Use this instead of process.env.NEXT_PUBLIC_CF_WORKER_URL directly
  * so users can configure the URL in Settings when not set at build time.
  */
-const STORAGE_KEY = 'smashhub-ai-worker-url';
+const STORAGE_KEY = 'buttonmasherz-ai-worker-url';
 
 export function getWorkerUrl(): string | undefined {
   if (typeof window === 'undefined') return process.env.NEXT_PUBLIC_CF_WORKER_URL;

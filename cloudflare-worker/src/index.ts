@@ -1,5 +1,5 @@
 /**
- * Cloudflare Worker for SmashHub Rules Bot + AI Director
+ * Cloudflare Worker for ButtonMasherz Rules Bot + AI Director
  * - Rules Bot: Llama 3.1 8B for tournament rules
  * - Director: Llama 3.2 11B Vision for stream switching
  */
@@ -306,7 +306,7 @@ async function handleRulesBot(request: Request, env: Env): Promise<Response> {
     }
 
     // Prepare prompt for Llama 3.1 8B
-    const prompt = `You are a helpful assistant for SmashHub. Answer questions about tournament rules based ONLY on the provided rules context.
+    const prompt = `You are a helpful assistant for ButtonMasherz. Answer questions about tournament rules based ONLY on the provided rules context.
 
 RULES CONTEXT:
 ${rulesContext}

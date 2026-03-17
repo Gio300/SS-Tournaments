@@ -1,5 +1,5 @@
 /**
- * SmashHub Chatbot help topics - system help, not just tournament rules.
+ * ButtonMasherz Chatbot help topics - system help, not just tournament rules.
  * SML is one tournament among many. Keywords map to answers.
  */
 
@@ -10,8 +10,8 @@ export interface HelpTopic {
 
 export const HELP_TOPICS: HelpTopic[] = [
   {
-    keywords: ['how', 'work', 'what', 'smashhub', 'platform', 'site', 'system', 'explain', 'overview', 'intro'],
-    answer: `**SmashHub** is a social platform for competitive gaming. It lets you:
+    keywords: ['how', 'work', 'what', 'buttonmasherz', 'platform', 'site', 'system', 'explain', 'overview', 'intro'],
+    answer: `**ButtonMasherz** is a social platform for competitive gaming. It lets you:
 • **Create a profile** – Set your username, bio, and save YouTube links
 • **Make reels** – Combine clips into highlight reels (manual or auto-add from saved links)
 • **Join clans** – Connect with groups, apply to join, or browse clan profiles
@@ -60,7 +60,7 @@ export const HELP_TOPICS: HelpTopic[] = [
   },
   {
     keywords: ['tournament', 'tournaments', 'sml', 'striker', 'league', 'rules'],
-    answer: `**Tournaments:** SmashHub hosts multiple tournaments. **SML (Striker Mode League)** is one of them.
+    answer: `**Tournaments:** ButtonMasherz hosts multiple tournaments. **SML (Striker Mode League)** is one of them.
 • Browse all under **More** → **Tournaments**
 • For SML-specific rules, see **Rules** and **FAQ**
 • Each tournament can have its own rules and format`,

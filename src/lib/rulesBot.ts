@@ -106,7 +106,7 @@ function scoreRule(keywords: string[], section: string, text: string): number {
 // Fallback keyword-based matching (used when AI is unavailable)
 export function getBotReply(userMessage: string): string {
   const trimmed = userMessage.trim();
-  if (!trimmed) return 'Ask about SmashHub: profiles, reels, auto-add, tiers, clans, tournaments, live streams, or SML rules.';
+  if (!trimmed) return 'Ask about ButtonMasherz: profiles, reels, auto-add, tiers, clans, tournaments, live streams, or SML rules.';
 
   // Try platform help first (profiles, reels, tiers, clans, auto, etc.)
   const helpAnswer = getHelpReply(trimmed);
@@ -151,7 +151,7 @@ export function getBotReply(userMessage: string): string {
 // AI-powered bot reply using Cloudflare Workers AI
 export async function getAIBotReply(userMessage: string): Promise<string> {
   const trimmed = userMessage.trim();
-  if (!trimmed) return 'Ask about SmashHub: profiles, reels, auto-add, tiers, clans, tournaments, live streams, or SML rules.';
+  if (!trimmed) return 'Ask about ButtonMasherz: profiles, reels, auto-add, tiers, clans, tournaments, live streams, or SML rules.';
 
   // Try platform help first (no AI needed for these)
   const helpAnswer = getHelpReply(trimmed);

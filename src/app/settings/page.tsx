@@ -64,7 +64,7 @@ function SettingsContent() {
     if (prefs?.textScale != null && TEXT_SCALES.includes(prefs.textScale)) {
       setTextScale(prefs.textScale);
     } else {
-      const stored = localStorage.getItem('smashhub-text-scale');
+      const stored = localStorage.getItem('buttonmasherz-text-scale');
       if (stored) {
         const n = parseFloat(stored);
         if (TEXT_SCALES.includes(n)) setTextScale(n);
@@ -74,7 +74,7 @@ function SettingsContent() {
 
   useEffect(() => {
     document.documentElement.style.fontSize = `${textScale * 100}%`;
-    localStorage.setItem('smashhub-text-scale', String(textScale));
+    localStorage.setItem('buttonmasherz-text-scale', String(textScale));
   }, [textScale]);
 
   useEffect(() => {
@@ -443,7 +443,7 @@ function SettingsContent() {
                     type="text"
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
-                    placeholder="Ask about SmashHub..."
+                    placeholder="Ask about ButtonMasherz..."
                     className="flex-1 bg-bg border border-border rounded-lg px-4 py-2.5 text-text-primary"
                   />
                   <button type="submit" disabled={chatLoading || !chatInput.trim()} className="p-2.5 rounded-lg bg-accent text-white disabled:opacity-50">

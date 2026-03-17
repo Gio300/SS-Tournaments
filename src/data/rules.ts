@@ -1,5 +1,5 @@
 /**
- * SmashHub Tournament Rules — SINGLE SOURCE OF TRUTH
+ * ButtonMasherz Tournament Rules — SINGLE SOURCE OF TRUTH
  * Updated 02/01/26
  */
 

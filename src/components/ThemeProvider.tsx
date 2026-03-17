@@ -13,8 +13,8 @@ const ThemeContext = createContext<{
   setColorScheme: (s: ColorScheme) => void;
 } | null>(null);
 
-const THEME_KEY = 'smashhub-theme';
-const COLOR_SCHEME_KEY = 'smashhub-color-scheme';
+const THEME_KEY = 'buttonmasherz-theme';
+const COLOR_SCHEME_KEY = 'buttonmasherz-color-scheme';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark');
