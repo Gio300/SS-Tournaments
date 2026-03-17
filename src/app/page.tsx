@@ -15,7 +15,7 @@ export default function HomePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         <HeroBg className="border border-border rounded-xl p-6 sm:p-8 mb-8 min-h-[140px] flex flex-col justify-center">
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-text-primary mb-2 flex items-center gap-2 flex-wrap">
-            Welcome to <BrandLogo as="span" className="text-2xl sm:text-3xl" />
+            Welcome to <BrandLogo as="span" variant="text" className="text-2xl sm:text-3xl" />
           </h1>
           <p className="text-text-muted">
             Quick links to get started
@@ -82,9 +82,7 @@ export default function HomePage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
       <HeroBg className="border border-border rounded-xl p-6 sm:p-8 mb-8 min-h-[180px] flex flex-col justify-center">
-        <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-text-primary mb-3">
-          <BrandLogo as="h1" className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl" />
-        </h1>
+        <BrandLogo as="h1" variant="image" className="mb-3" />
         <p className="text-text-muted text-lg sm:text-xl">
           Social platform for gaming · Rankings · Matches · Clans · Tournaments
         </p>
