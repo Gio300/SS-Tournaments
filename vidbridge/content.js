@@ -1,7 +1,11 @@
 /**
  * VidBridge - Content script
- * Listens for cookie requests from the Create Highlight page and responds with YouTube cookies.
+ * Listens for cookie requests and ping from the Create Highlight page.
  */
+
+document.addEventListener('buttonmasherz:request-extension-ping', () => {
+  document.dispatchEvent(new CustomEvent('buttonmasherz:extension-ready'));
+});
 
 document.addEventListener('buttonmasherz:request-yt-cookies', () => {
   chrome.runtime.sendMessage({ type: 'getYoutubeCookies' }, (response) => {

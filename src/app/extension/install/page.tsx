@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import { basePath } from '@/lib/basePath'
+import { getVidBridgeInstallUrl } from '@/lib/vidbridge'
 
 export default function ExtensionInstallPage() {
+  const installUrl = getVidBridgeInstallUrl()
+  const isChromeStore = installUrl.startsWith('https://chrome.google.com')
+
   function handleDownload() {
+    if (isChromeStore) {
+      window.open(installUrl, '_blank')
+      return
+    }
     const zipUrl = `${basePath ? basePath + '/' : ''}vidbridge.zip`
     const link = document.createElement('a')
     link.href = zipUrl
@@ -32,24 +40,42 @@ export default function ExtensionInstallPage() {
 
       <div className="rounded-xl border border-border bg-panel p-6 space-y-6">
         <h2 className="font-semibold text-text-primary">Step 1: Download</h2>
-        <p className="text-sm text-text-muted">
-          Click below to download the extension. A guide will open in a new window—arrange it side-by-side with Chrome Extensions to follow along.
-        </p>
-        <button
-          onClick={handleDownload}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90"
-        >
-          Download Extension
-        </button>
+        {isChromeStore ? (
+          <>
+            <p className="text-sm text-text-muted mb-4">
+              Get VidBridge from the Chrome Web Store. One click to install.
+            </p>
+            <a
+              href={installUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex gap-2 px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90"
+            >
+              Get VidBridge from Chrome Web Store
+            </a>
+          </>
+        ) : (
+          <>
+            <p className="text-sm text-text-muted mb-4">
+              Click below to download the extension. A guide will open in a new window—arrange it side-by-side with Chrome Extensions to follow along.
+            </p>
+            <button
+              onClick={handleDownload}
+              className="inline-flex gap-2 px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90"
+            >
+              Download Extension
+            </button>
 
-        <h2 className="font-semibold text-text-primary">Step 2: Install (Chrome)</h2>
-        <ol className="list-decimal list-inside space-y-3 text-text-muted text-sm">
-          <li>Extract the downloaded zip file</li>
-          <li>Open Chrome and go to <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">chrome://extensions/</code></li>
-          <li>Enable <strong className="text-text-primary">Developer mode</strong> (toggle in top-right)</li>
-          <li>Click <strong className="text-text-primary">Load unpacked</strong></li>
-          <li>Select the extracted <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">vidbridge</code> folder</li>
-        </ol>
+            <h2 className="font-semibold text-text-primary">Step 2: Install (Chrome)</h2>
+            <ol className="list-decimal list-inside space-y-3 text-text-muted text-sm">
+              <li>Extract the downloaded zip file</li>
+              <li>Open Chrome and go to <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">chrome://extensions/</code></li>
+              <li>Enable <strong className="text-text-primary">Developer mode</strong> (toggle in top-right)</li>
+              <li>Click <strong className="text-text-primary">Load unpacked</strong></li>
+              <li>Select the extracted <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">vidbridge</code> folder</li>
+            </ol>
+          </>
+        )}
 
         <h2 className="font-semibold text-text-primary">Usage</h2>
         <ul className="list-disc list-inside space-y-2 text-text-muted text-sm">

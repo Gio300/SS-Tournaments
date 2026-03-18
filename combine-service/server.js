@@ -63,7 +63,7 @@ async function downloadWithYtDlp(url, outDir, index, cookiesOverride) {
   const cookiesRaw = cookiesOverride || process.env.YOUTUBE_COOKIES;
   if (cookiesRaw && String(cookiesRaw).trim()) {
     const cookiesPath = path.join(os.tmpdir(), `cookies-${Date.now()}.txt`);
-    fs.writeFileSync(cookiesPath, cookiesEnv.trim());
+    fs.writeFileSync(cookiesPath, String(cookiesRaw).trim());
     args.splice(-1, 0, '--cookies', cookiesPath);
     try {
       await run('yt-dlp', args, outDir);

@@ -7,8 +7,7 @@
   "host_permissions": [
     "*://*.youtube.com/*",
     "*://*.youtu.be/*",
-    "https://gio300.github.io/*",
-    "http://localhost:*"
+    "https://gio300.github.io/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -24,12 +23,9 @@
   "content_scripts": [
     {
       "matches": [
-        "https://gio300.github.io/SS-Tournaments/reels/create/*",
         "https://gio300.github.io/SS-Tournaments/reels/create",
-        "http://localhost:3000/reels/create/*",
-        "http://localhost:3000/reels/create",
-        "http://127.0.0.1:3000/reels/create/*",
-        "http://127.0.0.1:3000/reels/create"
+        "https://gio300.github.io/SS-Tournaments/reels/create/",
+        "https://gio300.github.io/SS-Tournaments/reels/create/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"

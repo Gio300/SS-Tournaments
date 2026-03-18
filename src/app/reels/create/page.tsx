@@ -10,6 +10,8 @@ import { AuthGuard } from '@/components/AuthGuard'
 import { ExtensionRequiredModal } from '@/components/ExtensionRequiredModal'
 import { useExtensionPrompt } from '@/hooks/useExtensionPrompt'
 import { extractYouTubeId } from '@/lib/youtube'
+import { basePath } from '@/lib/basePath'
+import { getVidBridgeInstallUrl } from '@/lib/vidbridge'
 import type { UserYoutubeLink } from '@/types/database'
 
 type ClipInput =
@@ -63,6 +65,8 @@ function YoutubeSignInModal({
   creating,
   progress,
   step,
+  extensionDetected,
+  extensionPrivacyUrl,
 }: {
   show: boolean
   onClose: () => void
@@ -72,7 +76,17 @@ function YoutubeSignInModal({
   creating: boolean
   progress: number
   step: string
+  extensionDetected: boolean
+  extensionPrivacyUrl: string
 }) {
+  const [showManualPaste, setShowManualPaste] = useState(false)
+  const installUrl = getVidBridgeInstallUrl()
+  const isChromeStore = installUrl.startsWith('https://chrome.google.com')
+
+  useEffect(() => {
+    if (!show) setShowManualPaste(false)
+  }, [show])
+
   if (!show) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60" onClick={creating ? undefined : onClose}>
@@ -88,27 +102,61 @@ function YoutubeSignInModal({
         ) : (
           <>
             <h3 className="font-display text-lg font-bold text-text-primary mb-2">Link YouTube to create highlight</h3>
-            <p className="text-sm text-text-muted mb-4">
-              YouTube may block downloads. Install VidBridge for one-click sign-in, or sign in to YouTube and paste cookies below.
-            </p>
-            <a
-              href="https://www.youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 mb-4"
-            >
-              Open YouTube to sign in
-            </a>
-            <textarea
-              value={cookies}
-              onChange={(e) => onCookiesChange(e.target.value)}
-              placeholder="Paste Netscape-format cookies here (optional – try without first)"
-              rows={4}
-              className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-text-primary text-xs font-mono placeholder:text-text-muted mb-2"
-            />
             <p className="text-xs text-text-muted mb-4">
-              <a href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">How to export cookies</a> • Cookies are not stored
+              <Link href={extensionPrivacyUrl} className="text-accent hover:underline">VidBridge privacy policy</Link>
             </p>
+
+            {extensionDetected ? (
+              <div className="rounded-lg border border-accent/30 bg-accent/10 p-4 mb-4">
+                <p className="text-sm font-medium text-accent mb-1">VidBridge detected</p>
+                <p className="text-sm text-text-muted">Your YouTube session will be used automatically. Click Create Highlight below.</p>
+              </div>
+            ) : (
+              <div className="space-y-4 mb-4">
+                <div className="rounded-lg border border-border bg-bg/50 p-4">
+                  <p className="text-sm font-medium text-text-primary mb-2">Install VidBridge</p>
+                  <p className="text-xs text-text-muted mb-3">One-click sign-in. Sign in to YouTube, then click below.</p>
+                  <a
+                    href={installUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex gap-2 px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:opacity-90"
+                  >
+                    {isChromeStore ? 'Get VidBridge from Chrome Web Store' : 'Download VidBridge'}
+                  </a>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowManualPaste((v) => !v)}
+                  className="text-xs text-text-muted hover:text-accent hover:underline"
+                >
+                  {showManualPaste ? 'Hide' : 'Need to paste cookies manually?'}
+                </button>
+                {showManualPaste && (
+                  <div className="rounded-lg border border-border bg-bg/50 p-4 space-y-2">
+                    <a
+                      href="https://www.youtube.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex gap-2 px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700"
+                    >
+                      Open YouTube to sign in
+                    </a>
+                    <textarea
+                      value={cookies}
+                      onChange={(e) => onCookiesChange(e.target.value)}
+                      placeholder="Paste Netscape-format cookies here (optional – try without first)"
+                      rows={3}
+                      className="w-full px-3 py-2 rounded-lg bg-bg border border-border text-text-primary text-xs font-mono placeholder:text-text-muted"
+                    />
+                    <p className="text-xs text-text-muted">
+                      <a href="https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">How to export cookies</a> • Cookies are not stored
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-2">
               <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-border text-text-muted hover:text-text-primary">
                 Cancel
@@ -150,7 +198,23 @@ function CreateReelContent() {
   const [showPip, setShowPip] = useState(false)
   const [youtubeCookies, setYoutubeCookies] = useState('')
   const [showYoutubeModal, setShowYoutubeModal] = useState(false)
+  const [extensionDetected, setExtensionDetected] = useState(false)
   const [completedReel, setCompletedReel] = useState<{ id: string; combinedVideoUrl: string; title: string } | null>(null)
+
+  useEffect(() => {
+    if (!showYoutubeModal) return
+    setExtensionDetected(false)
+    const handler = () => setExtensionDetected(true)
+    document.addEventListener('buttonmasherz:extension-ready', handler)
+    document.dispatchEvent(new CustomEvent('buttonmasherz:request-extension-ping'))
+    const t = setTimeout(() => {
+      document.removeEventListener('buttonmasherz:extension-ready', handler)
+    }, 800)
+    return () => {
+      document.removeEventListener('buttonmasherz:extension-ready', handler)
+      clearTimeout(t)
+    }
+  }, [showYoutubeModal])
 
   useEffect(() => {
     const urlParam = searchParams.get('url')
@@ -260,11 +324,6 @@ function CreateReelContent() {
         }),
       })
       const data = await res.json()
-      // #region agent log
-      if (!res.ok) {
-        fetch('http://127.0.0.1:7308/ingest/8d921e9d-92c7-4815-8e32-88bd8715ba82',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'8792d5'},body:JSON.stringify({sessionId:'8792d5',location:'reels/create/page.tsx:combine',message:'Combine API error',data:{status:res.status,error:data.error,urls:youtubeClips.map(c=>c.url)},hypothesisId:'A',timestamp:Date.now()})}).catch(()=>{});
-      }
-      // #endregion
       if (!res.ok) throw new Error(data.error || 'Combine failed')
       setPipStep('Done')
       setPipProgress(100)
@@ -617,6 +676,8 @@ function CreateReelContent() {
         creating={saving}
         progress={pipProgress}
         step={pipStep}
+        extensionDetected={extensionDetected}
+        extensionPrivacyUrl={basePath ? `${basePath}/extension/privacy/` : '/extension/privacy/'}
       />
     </div>
   )
