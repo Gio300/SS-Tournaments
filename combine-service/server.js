@@ -51,12 +51,12 @@ function run(cmd, args, cwd) {
 async function downloadWithYtDlp(url, outDir, index, cookiesOverride) {
   const outPath = path.join(outDir, `clip_${index}.mp4`);
   const args = [
-    '-f', 'bestvideo+bestaudio/best',
+    '-f', 'best/bestvideo+bestaudio',
     '--merge-output-format', 'mp4',
     '-o', outPath,
     '--no-playlist',
     '--no-warnings',
-    // Workaround for "Sign in to confirm you're not a bot" - try android client first
+    // android client helps with "Sign in to confirm" - web may have more formats for some videos
     '--extractor-args', 'youtube:player_client=android',
     url,
   ];
