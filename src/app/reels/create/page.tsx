@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { useFFmpeg } from '@/hooks/useFFmpeg'
 import { AuthGuard } from '@/components/AuthGuard'
+import { ExtensionRequiredModal } from '@/components/ExtensionRequiredModal'
+import { useExtensionPrompt } from '@/hooks/useExtensionPrompt'
 import { extractYouTubeId } from '@/lib/youtube'
 import type { UserYoutubeLink } from '@/types/database'
 
@@ -87,7 +89,7 @@ function YoutubeSignInModal({
           <>
             <h3 className="font-display text-lg font-bold text-text-primary mb-2">Link YouTube to create highlight</h3>
             <p className="text-sm text-text-muted mb-4">
-              YouTube may block downloads. Sign in to YouTube in a new tab, then paste your cookies below so we can download the clips.
+              YouTube may block downloads. Install the ButtonMasherz extension for one-click sign-in, or sign in to YouTube and paste cookies below.
             </p>
             <a
               href="https://www.youtube.com"
@@ -203,6 +205,27 @@ function CreateReelContent() {
     setClips((c) => c.filter((_, j) => j !== i))
   }
 
+  function requestExtensionCookies(): Promise<string | null> {
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(null), 2000)
+      const handler = (e: CustomEvent<{ cookies: string }>) => {
+        clearTimeout(timeout)
+        document.removeEventListener('buttonmasherz:yt-cookies', handler as EventListener)
+        document.removeEventListener('buttonmasherz:yt-cookies-error', errHandler as EventListener)
+        resolve(e.detail?.cookies?.trim() || null)
+      }
+      const errHandler = () => {
+        clearTimeout(timeout)
+        document.removeEventListener('buttonmasherz:yt-cookies', handler as EventListener)
+        document.removeEventListener('buttonmasherz:yt-cookies-error', errHandler as EventListener)
+        resolve(null)
+      }
+      document.addEventListener('buttonmasherz:yt-cookies', handler as EventListener)
+      document.addEventListener('buttonmasherz:yt-cookies-error', errHandler as EventListener)
+      document.dispatchEvent(new CustomEvent('buttonmasherz:request-yt-cookies'))
+    })
+  }
+
   async function doYoutubeCombine() {
     const youtubeClips = clips.filter((c): c is ClipInput & { type: 'youtube' } => c.type === 'youtube')
     const combineUrl = process.env.NEXT_PUBLIC_COMBINE_API_URL!
@@ -211,6 +234,9 @@ function CreateReelContent() {
     setPipStep('Downloading clips')
     setPipProgress(15)
     try {
+      const extensionCookies = await requestExtensionCookies()
+      const cookiesToUse = extensionCookies || youtubeCookies.trim() || undefined
+
       setPipStep('Combining videos')
       setPipProgress(40)
       const res = await fetch(`${combineUrl.replace(/\/$/, '')}/combine`, {
@@ -220,7 +246,7 @@ function CreateReelContent() {
           urls: youtubeClips.map((c) => c.url),
           title: title.trim(),
           userId: user!.id,
-          ...(youtubeCookies.trim() && { cookies: youtubeCookies.trim() }),
+          ...(cookiesToUse && { cookies: cookiesToUse }),
         }),
       })
       const data = await res.json()
@@ -367,6 +393,7 @@ function CreateReelContent() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
+      <ExtensionRequiredModal show={showPrompt} onSkip={dismissPrompt} />
       <h1 className="font-display text-2xl font-bold text-text-primary mb-6">Create Highlight</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>

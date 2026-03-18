@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "ButtonMasherz Extension",
+  "version": "1.0.0",
+  "description": "Enables YouTube clip combining on ButtonMasherz by sharing your YouTube session.",
+  "permissions": ["cookies"],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://*.youtu.be/*",
+    "https://gio300.github.io/*",
+    "http://localhost:*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://gio300.github.io/SS-Tournaments/reels/create/*",
+        "https://gio300.github.io/SS-Tournaments/reels/create",
+        "http://localhost:3000/reels/create/*",
+        "http://localhost:3000/reels/create",
+        "http://127.0.0.1:3000/reels/create/*",
+        "http://127.0.0.1:3000/reels/create"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

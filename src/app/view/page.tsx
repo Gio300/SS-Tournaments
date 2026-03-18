@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Trophy, Radio, Film, MessageSquare, Swords, Search } from 'lucide-react';
+import { Trophy, Radio, Film, LayoutGrid, MessageSquare, Swords, Search } from 'lucide-react';
 
 export default function ViewPage() {
   return (
@@ -44,6 +44,19 @@ export default function ViewPage() {
           <div>
             <h2 className="font-semibold text-text-primary mb-1">Reels</h2>
             <p className="text-text-muted text-sm">Highlight reels and clips</p>
+          </div>
+        </Link>
+
+        <Link
+          href="/view/watch/"
+          className="flex items-start gap-4 p-4 rounded-xl border border-border bg-panel hover:border-accent transition group"
+        >
+          <div className="p-2 rounded-lg bg-accent/20 group-hover:bg-accent/30 transition">
+            <LayoutGrid className="text-accent" size={24} />
+          </div>
+          <div>
+            <h2 className="font-semibold text-text-primary mb-1">Watch</h2>
+            <p className="text-text-muted text-sm">Build a playlist of reels and live streams. Watch multiple in sequence.</p>
           </div>
         </Link>
 

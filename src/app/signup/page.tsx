@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { ExtensionRequiredModal, shouldShowExtensionPrompt } from '@/components/ExtensionRequiredModal'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -12,6 +13,13 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
+  const [showExtensionPrompt, setShowExtensionPrompt] = useState(false)
+
+  useEffect(() => {
+    if (sent && shouldShowExtensionPrompt()) {
+      setShowExtensionPrompt(true)
+    }
+  }, [sent])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -47,6 +55,10 @@ export default function SignupPage() {
   if (sent) {
     return (
       <div className="max-w-md mx-auto px-4 sm:px-6 py-16">
+        <ExtensionRequiredModal
+          show={showExtensionPrompt}
+          onSkip={() => setShowExtensionPrompt(false)}
+        />
         <div className="text-center rounded-2xl border border-border bg-panel p-8">
           <h1 className="font-display text-2xl font-bold text-text-primary mb-4">Check your email</h1>
           <p className="text-text-muted mb-6">

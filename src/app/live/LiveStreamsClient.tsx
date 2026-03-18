@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
 import { extractYouTubeId } from '@/lib/youtube';
+import { ExtensionRequiredModal, shouldShowExtensionPrompt } from '@/components/ExtensionRequiredModal';
 import type { LiveGroup } from '@/types/database';
 
 type GroupWithMembers = LiveGroup & {
@@ -91,15 +92,10 @@ export function LiveStreamsClient() {
     fetchPending();
   }, [user]);
 
-  async function handleAdd(e: React.FormEvent) {
-    e.preventDefault();
-    setError('');
-    const videoId = extractYouTubeId(youtubeUrl);
-    if (!videoId) {
-      setError('Invalid YouTube URL');
-      return;
-    }
+  async function performAdd() {
     if (!user) return;
+    const videoId = extractYouTubeId(youtubeUrl);
+    if (!videoId) return;
     setAdding(true);
     const { error: err } = await supabase.from('live_streams').insert({
       user_id: user.id,
@@ -115,6 +111,31 @@ export function LiveStreamsClient() {
     setTitle('');
     const { data } = await supabase.from('live_streams').select('id, youtube_url, title').order('created_at', { ascending: false });
     setStreams(data ?? []);
+  }
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    const videoId = extractYouTubeId(youtubeUrl);
+    if (!videoId) {
+      setError('Invalid YouTube URL');
+      return;
+    }
+    if (!user) return;
+    if (shouldShowExtensionPrompt()) {
+      setShowExtensionPrompt(true);
+      setPendingAdd(true);
+      return;
+    }
+    await performAdd();
+  }
+
+  function handleExtensionSkip() {
+    setShowExtensionPrompt(false);
+    if (pendingAdd) {
+      setPendingAdd(false);
+      performAdd();
+    }
   }
 
   async function handleCreateGroup(e: React.FormEvent) {
@@ -194,6 +215,10 @@ export function LiveStreamsClient() {
 
   return (
     <>
+      <ExtensionRequiredModal
+        show={showExtensionPrompt}
+        onSkip={handleExtensionSkip}
+      />
       {user && (
         <form onSubmit={handleAdd} className="rounded-xl border border-border bg-panel p-6 mb-8">
           <h2 className="font-semibold text-text-primary mb-4">Add stream</h2>

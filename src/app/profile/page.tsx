@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase'
 import { extractYouTubeId } from '@/lib/youtube'
 import { useAuth } from '@/hooks/useAuth'
 import { AuthGuard } from '@/components/AuthGuard'
+import { ExtensionRequiredModal, shouldShowExtensionPrompt } from '@/components/ExtensionRequiredModal'
+import { useExtensionPrompt } from '@/hooks/useExtensionPrompt'
 import { PostComposer } from '@/components/PostComposer'
 import { PostCard } from '@/components/PostCard'
 import { TrophyBadges } from '@/components/TrophyBadges'
@@ -23,6 +25,7 @@ type FeedItem = { type: 'post'; data: PostWithExtras } | { type: 'reel'; data: R
 function ProfileContent() {
   const { user, profile, refreshProfile } = useAuth()
   const router = useRouter()
+  const { showPrompt, dismissPrompt } = useExtensionPrompt('profile')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [wallMode, setWallMode] = useState<'my' | 'feed'>('feed')
   const [feedItems, setFeedItems] = useState<FeedItem[]>([])
@@ -38,6 +41,8 @@ function ProfileContent() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [trophyTypes, setTrophyTypes] = useState<string[]>([])
   const [myReels, setMyReels] = useState<ReelWithProfile[]>([])
+  const [showExtensionPrompt, setShowExtensionPrompt] = useState(false)
+  const [pendingAddYoutubeLink, setPendingAddYoutubeLink] = useState(false)
 
   useEffect(() => {
     setUsername(profile?.username ?? '')
@@ -198,8 +203,7 @@ function ProfileContent() {
     e.target.value = ''
   }
 
-  async function addYoutubeLink(e: React.FormEvent) {
-    e.preventDefault()
+  async function performAddYoutubeLink() {
     if (!user || !newYoutubeUrl.trim()) return
     const url = newYoutubeUrl.trim()
     if (!extractYouTubeId(url)) return
@@ -208,6 +212,28 @@ function ProfileContent() {
     if (data) setYoutubeLinks((prev) => [data, ...prev])
     setNewYoutubeUrl('')
     setAddingLink(false)
+  }
+
+  async function addYoutubeLink(e: React.FormEvent) {
+    e.preventDefault()
+    if (!user || !newYoutubeUrl.trim()) return
+    const url = newYoutubeUrl.trim()
+    if (!extractYouTubeId(url)) return
+    if (shouldShowExtensionPrompt()) {
+      setShowExtensionPrompt(true)
+      setPendingAddYoutubeLink(true)
+      return
+    }
+    await performAddYoutubeLink()
+  }
+
+  function handleExtensionSkip() {
+    setShowExtensionPrompt(false)
+    if (pendingAddYoutubeLink) {
+      setPendingAddYoutubeLink(false)
+      performAddYoutubeLink()
+    }
+    dismissPrompt()
   }
 
   async function removeYoutubeLink(id: string) {
@@ -250,6 +276,7 @@ function ProfileContent() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <ExtensionRequiredModal show={showPrompt || showExtensionPrompt} onSkip={handleExtensionSkip} />
       <div className="flex flex-col lg:flex-row gap-8">
         <aside className="lg:w-56 shrink-0 order-2 lg:order-1">
           <div className="rounded-xl border border-border bg-panel p-4 sticky top-24">
@@ -272,6 +299,9 @@ function ProfileContent() {
               </Link>
               <Link href="/settings/" className="block px-3 py-2 rounded-lg text-sm text-text-muted hover:text-accent hover:bg-accent/10 transition">
                 Settings
+              </Link>
+              <Link href="/extension/install/" className="block px-3 py-2 rounded-lg text-sm text-text-muted hover:text-accent hover:bg-accent/10 transition">
+                Download Extension
               </Link>
             </nav>
           </div>

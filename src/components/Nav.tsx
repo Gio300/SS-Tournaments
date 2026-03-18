@@ -13,7 +13,7 @@ import { BrandLogo } from '@/components/BrandLogo';
 const primaryLinks: { href: string; label: string; activePaths?: string[] }[] = [
   { href: '/', label: 'Home' },
   { href: '/play/', label: 'Play', activePaths: ['/play/', '/tournaments/', '/matches/'] },
-  { href: '/view/', label: 'View', activePaths: ['/view/', '/rankings/', '/live/', '/reels/', '/following/', '/community/', '/search/'] },
+  { href: '/view/', label: 'View', activePaths: ['/view/', '/rankings/', '/live/', '/reels/', '/view/watch/', '/following/', '/community/', '/search/'] },
   { href: '/boards/', label: 'Clan' },
   { href: '/profile/', label: 'Profile' },
   { href: '/settings/', label: 'Settings' },
