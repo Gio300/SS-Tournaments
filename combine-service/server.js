@@ -51,7 +51,8 @@ function run(cmd, args, cwd) {
 async function downloadWithYtDlp(url, outDir, index, cookiesOverride) {
   const outPath = path.join(outDir, `clip_${index}.mp4`);
   const args = [
-    '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+    '-f', 'bestvideo+bestaudio/best',
+    '--merge-output-format', 'mp4',
     '-o', outPath,
     '--no-playlist',
     '--no-warnings',
