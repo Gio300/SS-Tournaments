@@ -35,6 +35,8 @@ export function LiveStreamsClient() {
   const [pendingInvites, setPendingInvites] = useState<{ id: string; group_id: string; group?: { name: string } }[]>([]);
   const [viewingGroupId, setViewingGroupId] = useState<string | null>(null);
   const [myStreams, setMyStreams] = useState<{ id: string; title: string | null }[]>([]);
+  const [showExtensionPrompt, setShowExtensionPrompt] = useState(false);
+  const [pendingAdd, setPendingAdd] = useState(false);
 
   useEffect(() => {
     async function fetch() {
