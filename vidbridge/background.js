@@ -6,8 +6,9 @@
 function toNetscape(cookies) {
   const lines = ['# Netscape HTTP Cookie File'];
   for (const c of cookies) {
-    const domain = c.domain.startsWith('.') ? c.domain.slice(1) : c.domain;
-    const includeSubdomains = c.domain.startsWith('.') ? 'TRUE' : 'FALSE';
+    // Netscape format: domain must have leading dot when includeSubdomains is TRUE
+    const domain = c.domain.startsWith('.') ? c.domain : '.' + c.domain;
+    const includeSubdomains = 'TRUE';
     const secure = c.secure ? 'TRUE' : 'FALSE';
     const exp = c.expirationDate ? Math.floor(c.expirationDate) : '0';
     lines.push(`${domain}\t${includeSubdomains}\t${c.path || '/'}\t${secure}\t${exp}\t${c.name}\t${c.value}`);
