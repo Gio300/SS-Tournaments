@@ -132,6 +132,7 @@ function YoutubeSignInModal({
 function CreateReelContent() {
   const { user } = useAuth()
   const router = useRouter()
+  const { showPrompt, dismissPrompt } = useExtensionPrompt('create')
   const { concatVideos, loading: ffmpegLoading, progress } = useFFmpeg()
   const [title, setTitle] = useState('')
   const [clips, setClips] = useState<ClipInput[]>([])
