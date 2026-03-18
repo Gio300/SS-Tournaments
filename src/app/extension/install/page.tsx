@@ -1,6 +1,26 @@
+'use client'
+
 import Link from 'next/link'
+import { basePath } from '@/lib/basePath'
 
 export default function ExtensionInstallPage() {
+  function handleDownload() {
+    const zipUrl = `${basePath ? basePath + '/' : ''}buttonmasherz-extension.zip`
+    const link = document.createElement('a')
+    link.href = zipUrl
+    link.download = 'buttonmasherz-extension.zip'
+    link.click()
+
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const pathPrefix = basePath ? `${basePath}/` : '/'
+    const guideUrl = `${origin}${pathPrefix}extension/install/guide/`
+    window.open(
+      guideUrl,
+      'extensionGuide',
+      'width=500,height=750,left=0,top=0,scrollbars=yes,resizable=yes'
+    )
+  }
+
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <h1 className="font-display text-2xl sm:text-3xl font-bold text-text-primary mb-2">
@@ -11,17 +31,25 @@ export default function ExtensionInstallPage() {
       </p>
 
       <div className="rounded-xl border border-border bg-panel p-6 space-y-6">
-        <h2 className="font-semibold text-text-primary">Install (Chrome)</h2>
+        <h2 className="font-semibold text-text-primary">Step 1: Download</h2>
+        <p className="text-sm text-text-muted">
+          Click below to download the extension. A guide will open in a new window—arrange it side-by-side with Chrome Extensions to follow along.
+        </p>
+        <button
+          onClick={handleDownload}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90"
+        >
+          Download Extension
+        </button>
+
+        <h2 className="font-semibold text-text-primary">Step 2: Install (Chrome)</h2>
         <ol className="list-decimal list-inside space-y-3 text-text-muted text-sm">
+          <li>Extract the downloaded zip file</li>
           <li>Open Chrome and go to <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">chrome://extensions/</code></li>
           <li>Enable <strong className="text-text-primary">Developer mode</strong> (toggle in top-right)</li>
           <li>Click <strong className="text-text-primary">Load unpacked</strong></li>
-          <li>Select the <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">buttonmasherz-extension</code> folder from the ButtonMasherz repo</li>
+          <li>Select the extracted <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">buttonmasherz-extension</code> folder</li>
         </ol>
-
-        <p className="text-sm text-text-muted">
-          If you have the extension as a zip file, extract it first, then select the extracted folder.
-        </p>
 
         <h2 className="font-semibold text-text-primary">Usage</h2>
         <ul className="list-disc list-inside space-y-2 text-text-muted text-sm">
@@ -30,7 +58,7 @@ export default function ExtensionInstallPage() {
           <li>Click Create Highlight – the extension automatically provides your YouTube session</li>
         </ul>
 
-        <div className="pt-4">
+        <div className="pt-4 flex gap-2">
           <Link
             href="/reels/create/"
             className="inline-block px-4 py-2 rounded-lg bg-accent text-white font-semibold hover:opacity-90"
