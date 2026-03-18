@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
@@ -89,7 +89,7 @@ function YoutubeSignInModal({
           <>
             <h3 className="font-display text-lg font-bold text-text-primary mb-2">Link YouTube to create highlight</h3>
             <p className="text-sm text-text-muted mb-4">
-              YouTube may block downloads. Install the ButtonMasherz extension for one-click sign-in, or sign in to YouTube and paste cookies below.
+              YouTube may block downloads. Install VidBridge for one-click sign-in, or sign in to YouTube and paste cookies below.
             </p>
             <a
               href="https://www.youtube.com"
@@ -132,6 +132,7 @@ function YoutubeSignInModal({
 function CreateReelContent() {
   const { user } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { showPrompt, dismissPrompt } = useExtensionPrompt('create')
   const { concatVideos, loading: ffmpegLoading, progress } = useFFmpeg()
   const [title, setTitle] = useState('')
@@ -150,6 +151,14 @@ function CreateReelContent() {
   const [youtubeCookies, setYoutubeCookies] = useState('')
   const [showYoutubeModal, setShowYoutubeModal] = useState(false)
   const [completedReel, setCompletedReel] = useState<{ id: string; combinedVideoUrl: string; title: string } | null>(null)
+
+  useEffect(() => {
+    const urlParam = searchParams.get('url')
+    if (urlParam && /youtube\.com|youtu\.be/.test(urlParam)) {
+      setYoutubeUrl(urlParam)
+      router.replace('/reels/create/', { scroll: false })
+    }
+  }, [searchParams, router])
 
   useEffect(() => {
     if (!user) return

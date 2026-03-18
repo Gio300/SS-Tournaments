@@ -5,10 +5,10 @@ import { basePath } from '@/lib/basePath'
 
 export default function ExtensionInstallPage() {
   function handleDownload() {
-    const zipUrl = `${basePath ? basePath + '/' : ''}buttonmasherz-extension.zip`
+    const zipUrl = `${basePath ? basePath + '/' : ''}vidbridge.zip`
     const link = document.createElement('a')
     link.href = zipUrl
-    link.download = 'buttonmasherz-extension.zip'
+    link.download = 'vidbridge.zip'
     link.click()
 
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
@@ -24,10 +24,10 @@ export default function ExtensionInstallPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <h1 className="font-display text-2xl sm:text-3xl font-bold text-text-primary mb-2">
-        Install ButtonMasherz Extension
+        Install VidBridge
       </h1>
       <p className="text-text-muted mb-8">
-        The ButtonMasherz Extension is required for the best experience when creating highlights, adding live streams, and using YouTube features on this site.
+        VidBridge is required for the best experience when creating highlights, adding live streams, and using YouTube features on this site.
       </p>
 
       <div className="rounded-xl border border-border bg-panel p-6 space-y-6">
@@ -48,7 +48,7 @@ export default function ExtensionInstallPage() {
           <li>Open Chrome and go to <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">chrome://extensions/</code></li>
           <li>Enable <strong className="text-text-primary">Developer mode</strong> (toggle in top-right)</li>
           <li>Click <strong className="text-text-primary">Load unpacked</strong></li>
-          <li>Select the extracted <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">buttonmasherz-extension</code> folder</li>
+          <li>Select the extracted <code className="px-1.5 py-0.5 rounded bg-bg text-text-primary">vidbridge</code> folder</li>
         </ol>
 
         <h2 className="font-semibold text-text-primary">Usage</h2>

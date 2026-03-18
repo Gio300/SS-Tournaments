@@ -37,10 +37,10 @@ export function ExtensionRequiredModal({
         onClick={(e) => e.stopPropagation()}
       >
         <h3 className="font-display text-lg font-bold text-text-primary mb-2">
-          ButtonMasherz Extension Required
+          VidBridge Required
         </h3>
         <p className="text-sm text-text-muted mb-4">
-          ButtonMasherz Extension is required to use this site. Download and install it to continue.
+          VidBridge is required to use this site. Download and install it to continue.
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <Link

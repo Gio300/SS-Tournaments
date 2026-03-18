@@ -1,5 +1,5 @@
 /**
- * ButtonMasherz YouTube Helper - Content script
+ * VidBridge - Content script
  * Listens for cookie requests from the Create Highlight page and responds with YouTube cookies.
  */
 

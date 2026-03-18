@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "ButtonMasherz Extension",
+  "name": "VidBridge",
   "version": "1.0.0",
-  "description": "Enables YouTube clip combining on ButtonMasherz by sharing your YouTube session.",
-  "permissions": ["cookies"],
+  "description": "Bridge YouTube to ButtonMasherz. Share your session for clip combining, quick links, and right-click add.",
+  "permissions": ["cookies", "contextMenus"],
   "host_permissions": [
     "*://*.youtube.com/*",
     "*://*.youtu.be/*",
@@ -12,6 +12,14 @@
   ],
   "background": {
     "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "content_scripts": [
     {

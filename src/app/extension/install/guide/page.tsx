@@ -45,7 +45,7 @@ export default function ExtensionInstallGuidePage() {
           <li>Paste <code className="px-1 rounded bg-bg text-text-primary">chrome://extensions/</code> in the address bar and press Enter</li>
           <li>Enable <strong className="text-text-primary">Developer mode</strong> (top-right)</li>
           <li>Click <strong className="text-text-primary">Load unpacked</strong></li>
-          <li>Select the extracted <code className="px-1 rounded bg-bg text-text-primary">buttonmasherz-extension</code> folder</li>
+          <li>Select the extracted <code className="px-1 rounded bg-bg text-text-primary">vidbridge</code> folder</li>
         </ol>
       </div>
 

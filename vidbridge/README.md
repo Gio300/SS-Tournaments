@@ -1,20 +1,20 @@
-# ButtonMasherz Extension
+# VidBridge
 
-Chrome extension that enables YouTube clip combining on ButtonMasherz by sharing your YouTube session cookies. No manual cookie export needed.
+Chrome extension that bridges YouTube to ButtonMasherz. Share your YouTube session for clip combining, quick links, and right-click add.
 
 ## Install (Development)
 
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable **Developer mode** (toggle in top-right)
 3. Click **Load unpacked**
-4. Select the `buttonmasherz-extension` folder
+4. Select the `vidbridge` folder
 
 ## Usage
 
 1. Sign in to [youtube.com](https://www.youtube.com) in Chrome
 2. Go to ButtonMasherz Create Highlight and add 2–8 YouTube URLs
 3. Click Create Highlight – the extension automatically provides your YouTube session
-4. No cookie paste required
+4. Right-click any YouTube link → "Create highlight from this (VidBridge)" to open Create Highlight with the URL pre-filled
 
 ## Privacy
 
